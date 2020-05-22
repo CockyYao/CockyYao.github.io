@@ -46,20 +46,20 @@
   };
 </script>
 
-  <meta name="description" content="我是来自杭州的Java程序员，目前在猪厂工作。本站是我平时写的一些博客文章，主要关注Java领域相关技术，希望来到这里的读者能找到些有点用的。">
+  <meta name="description" content="简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。 如何使用？1234567891011121314151617181920private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();public static void setI">
 <meta property="og:type" content="article">
-<meta property="og:title" content="写在2020年的春节">
-<meta property="og:url" content="http://yoursite.com/2020/01/27/index/index.html">
+<meta property="og:title" content="关于ThreadLocal的思考">
+<meta property="og:url" content="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="我是来自杭州的Java程序员，目前在猪厂工作。本站是我平时写的一些博客文章，主要关注Java领域相关技术，希望来到这里的读者能找到些有点用的。">
+<meta property="og:description" content="简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。 如何使用？1234567891011121314151617181920private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();public static void setI">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-01-26T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-01-26T23:11:11.047Z">
+<meta property="article:published_time" content="2020-02-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-22T02:55:58.149Z">
 <meta property="article:author" content="doubleyao">
-<meta property="article:tag" content="life">
+<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/01/27/index/">
+<link rel="canonical" href="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/">
 
 
 <script id="page-configurations">
@@ -71,7 +71,7 @@
   };
 </script>
 
-  <title>写在2020年的春节 | DoubleYao&HebeHo's Blog</title>
+  <title>关于ThreadLocal的思考 | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/index/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -199,7 +199,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          写在2020年的春节
+          关于ThreadLocal的思考
         </h1>
 
         <div class="post-meta">
@@ -208,18 +208,24 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-01-27 00:00:00 / 修改时间：07:11:11" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
+              <time title="创建时间：2020-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-21T00:00:00+08:00">2020-02-21</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-22 10:55:58" itemprop="dateModified" datetime="2020-05-22T10:55:58+08:00">2020-05-22</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E7%94%9F%E6%B4%BB/" itemprop="url" rel="index">
-                    <span itemprop="name">个人生活</span>
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95/" itemprop="url" rel="index">
+                    <span itemprop="name">技术发展</span>
                   </a>
                 </span>
             </span>
@@ -235,9 +241,25 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>我是来自杭州的Java程序员，目前在猪厂工作。本站是我平时写的一些博客文章，主要关注Java领域相关技术，希望来到这里的读者能找到些有点用的。</p>
+        <p>简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。</p>
+<h4 id="如何使用？"><a href="#如何使用？" class="headerlink" title="如何使用？"></a>如何使用？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">public static void setId(String id) &#123;</span><br><span class="line">    if(StringUtils.isBlank(id))&#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    MDC.put(&quot;id&quot;, id);</span><br><span class="line">    idThreadLocal.set(id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static String getId() &#123;</span><br><span class="line">    return idThreadLocal.get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static void clear() &#123;</span><br><span class="line">    idThreadLocal.remove();;</span><br><span class="line">    MDC.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <a id="more"></a>
-<p>这几天全国都在抗新型冠状病毒，在家宅了很久了，也恰好遇到年假，所以把好久没更新的博客，重新更新一次。毕竟记录生活的点滴，是非常珍贵的事情。</p>
+<p>声明一个ThreadLocal，一般都是静态的，由于每个Thread中单独地维护一个ThreadLocal.ThreadLocalMap的结构，当我们set一个值进去，ThreadLocal本身作为key,放到map中，如果是非静态的，每一个类都会产生一个threadLocal实例，这是没有意义的。有内存浪费。</p>
+<h4 id="整体如何设计的？"><a href="#整体如何设计的？" class="headerlink" title="整体如何设计的？"></a>整体如何设计的？</h4><p>ThreadLocal设计了一个内部类，ThreadLocalMap,ThreadLocalMap内部存储一系列的Entry&lt;K,V&gt;。</p>
+<p>每一个线程Thread内部拥有一个ThreadLocal.ThreadLocalMap变量，其单独维护这个map，不同线程之间相互隔离，线程安全。</p>
+<h4 id="ThreadLocalMap的key为什么是弱引用？"><a href="#ThreadLocalMap的key为什么是弱引用？" class="headerlink" title="ThreadLocalMap的key为什么是弱引用？"></a>ThreadLocalMap的key为什么是弱引用？</h4><p>结合一张图，</p>
+<p>ThreadLocalMap的key即为一个ThreadLocal,其生命周期与Thread一样长。</p>
+<ol>
+<li>若是强引用，当我们不需要threadlocal了，将其置为null，但由于ThreadLocalMap的key仍然持有ThreadLocal的引用，此时仍然不会gc。消耗内存。</li>
+<li>若是弱引用，当我们显式地置为null，弱引用一旦扫描到，就会gc。</li>
+<li>&lt;null, value&gt;的entry被认为是不新鲜的Entry,会在下一次set,get，remove中被回收。（见源码）</li>
+</ol>
+<h4 id="ThreadLocalMap的设计"><a href="#ThreadLocalMap的设计" class="headerlink" title="ThreadLocalMap的设计"></a>ThreadLocalMap的设计</h4><p>ThreadLocalMap的存储采用一个数组，本质是使用开放定址法+线性探测去实现的，这和拉链法的hashmap不同，其非常容易出现冲突的现象，一旦冲突会探测到下一个地址。设计原因如下：</p>
+<ol>
+<li>可能存在多次冲突的现象，但是用了斐波那契的神奇数字，让哈希码均匀的分布在2的N次方</li>
+<li>由于存储的数据量往往不太大的，而且弱引用，会被垃圾回收。比较节省空间。</li>
+</ol>
+<h4 id="为什么会有FastThreadLocal"><a href="#为什么会有FastThreadLocal" class="headerlink" title="为什么会有FastThreadLocal"></a>为什么会有FastThreadLocal</h4><p>用索引代替了ThreadLocal中的threadLocalHashCode，当请求频繁时，这个小改动就会显现其效果。</p>
 
     </div>
 
@@ -247,7 +269,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/life/" rel="tag"># life</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
           </div>
 
         
@@ -255,11 +277,11 @@
 
         
     <div class="post-nav">
-      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" rel="next" title="关于ThreadLocal的思考">
-      关于ThreadLocal的思考 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/01/27/index/" rel="prev" title="写在2020年的春节">
+      <i class="fa fa-chevron-left"></i> 写在2020年的春节
     </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -319,6 +341,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何使用？"><span class="nav-number">1.</span> <span class="nav-text">如何使用？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#整体如何设计的？"><span class="nav-number">2.</span> <span class="nav-text">整体如何设计的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadLocalMap的key为什么是弱引用？"><span class="nav-number">3.</span> <span class="nav-text">ThreadLocalMap的key为什么是弱引用？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadLocalMap的设计"><span class="nav-number">4.</span> <span class="nav-text">ThreadLocalMap的设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么会有FastThreadLocal"><span class="nav-number">5.</span> <span class="nav-text">为什么会有FastThreadLocal</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

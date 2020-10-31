@@ -46,29 +46,32 @@
   };
 </script>
 
-  <meta name="description" content="就是干">
-<meta property="og:type" content="website">
-<meta property="og:title" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="大家都知道，要快速涨薪，跳槽是一条路子，而你要跳槽，算法得好好巩固一下。如何巩固算法？刷leetcode。 为什么觉得动态规划很难呢？经过一段时间的集中刷题，人们会发现一些内在的规律，其实最重要的是找到某一类问题的思考角度，然后推导出动态规划的递推公式。最后这种题目一般迎刃而解。 这篇文章主要将一些比较经典的动态规划题目，进行总结，将一些问题的思考角度、递推公式予以记录，便于后续的复习。 青蛙跳台">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划的思考">
+<meta property="og:url" content="http://yoursite.com/2020/09/21/dp%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="就是干">
+<meta property="og:description" content="大家都知道，要快速涨薪，跳槽是一条路子，而你要跳槽，算法得好好巩固一下。如何巩固算法？刷leetcode。 为什么觉得动态规划很难呢？经过一段时间的集中刷题，人们会发现一些内在的规律，其实最重要的是找到某一类问题的思考角度，然后推导出动态规划的递推公式。最后这种题目一般迎刃而解。 这篇文章主要将一些比较经典的动态规划题目，进行总结，将一些问题的思考角度、递推公式予以记录，便于后续的复习。 青蛙跳台">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-10-31T04:06:16.202Z">
 <meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/">
+<link rel="canonical" href="http://yoursite.com/2020/09/21/dp%E6%80%BB%E7%BB%93/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
+    isHome: false,
+    isPost: true
   };
 </script>
 
-  <title>DoubleYao&HebeHo's Blog</title>
+  <title>动态规划的思考 | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -179,10 +182,10 @@
             
 
   <div class="posts-expand">
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/21/dp%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -196,8 +199,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/09/21/dp%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">动态规划的思考</a>
+          动态规划的思考
         </h1>
 
         <div class="post-meta">
@@ -239,7 +241,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>大家都知道，要快速涨薪，跳槽是一条路子，而你要跳槽，算法得好好巩固一下。如何巩固算法？刷leetcode。</p>
+        <p>大家都知道，要快速涨薪，跳槽是一条路子，而你要跳槽，算法得好好巩固一下。如何巩固算法？刷leetcode。</p>
 <p>为什么觉得动态规划很难呢？经过一段时间的集中刷题，人们会发现一些内在的规律，其实最重要的是找到某一类问题的思考角度，然后推导出动态规划的递推公式。最后这种题目一般迎刃而解。</p>
 <p>这篇文章主要将一些比较经典的动态规划题目，进行总结，将一些问题的思考角度、递推公式予以记录，便于后续的复习。</p>
 <h4 id="青蛙跳台阶问题"><a href="#青蛙跳台阶问题" class="headerlink" title="青蛙跳台阶问题"></a>青蛙跳台阶问题</h4><ul>
@@ -280,185 +282,36 @@
 <p>首先注意，这是子串，不是子序列，串是连续的。</p>
 <p>接下来思考：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">boolean 数组，dp[i][j] 记录 i-&gt;j 的串是否为回文</span><br><span class="line"></span><br><span class="line">dp[i][j] &#x3D; ?</span><br><span class="line">    if(a[i]&#x3D;&#x3D;a[j])&#123;</span><br><span class="line">        if(j&#x3D;i+1)&#123;</span><br><span class="line">            dp[i][j] &#x3D; true</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            dp[i][j] &#x3D; dp[i+1][j-1]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        dp[i][j] &#x3D; false;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
 
         
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">关于ThreadLocal的思考</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-21T00:00:00+08:00">2020-02-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-22 10:55:58" itemprop="dateModified" datetime="2020-05-22T10:55:58+08:00">2020-05-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95/" itemprop="url" rel="index">
-                    <span itemprop="name">技术发展</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。</p>
-<h4 id="如何使用？"><a href="#如何使用？" class="headerlink" title="如何使用？"></a>如何使用？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">public static void setId(String id) &#123;</span><br><span class="line">    if(StringUtils.isBlank(id))&#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    MDC.put(&quot;id&quot;, id);</span><br><span class="line">    idThreadLocal.set(id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static String getId() &#123;</span><br><span class="line">    return idThreadLocal.get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static void clear() &#123;</span><br><span class="line">    idThreadLocal.remove();;</span><br><span class="line">    MDC.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" rel="prev" title="关于ThreadLocal的思考">
+      <i class="fa fa-chevron-left"></i> 关于ThreadLocal的思考
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/index/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/27/index/" class="post-title-link" itemprop="url">写在2020年的春节</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-01-27 00:00:00 / 修改时间：07:11:11" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E7%94%9F%E6%B4%BB/" itemprop="url" rel="index">
-                    <span itemprop="name">个人生活</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>我是来自杭州的Java程序员，目前在猪厂工作。本站是我平时写的一些博客文章，主要关注Java领域相关技术，希望来到这里的读者能找到些有点用的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/01/27/index/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
   </article>
   
   
   
 
   </div>
-
-  
-
 
 
           </div>
@@ -509,6 +362,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#青蛙跳台阶问题"><span class="nav-number">1.</span> <span class="nav-text">青蛙跳台阶问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#完全平方数"><span class="nav-number">2.</span> <span class="nav-text">完全平方数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#剪绳子"><span class="nav-number">3.</span> <span class="nav-text">剪绳子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LIS-最大不下降的子序列"><span class="nav-number">4.</span> <span class="nav-text">LIS 最大不下降的子序列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最长回文子序列长度"><span class="nav-number">5.</span> <span class="nav-text">最长回文子序列长度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LPS-最长回文子串"><span class="nav-number">6.</span> <span class="nav-text">LPS 最长回文子串</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

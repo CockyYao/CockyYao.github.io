@@ -46,20 +46,20 @@
   };
 </script>
 
-  <meta name="description" content="Java虚拟机是如何使用内存的？ 内存空间的分配？以及每块区域都是干嘛的，哪些是线程隔离的？  123456789101112131415161718192021222324252627282930313233343536373839404142Java虚拟机在执行一个Java应用的时候，会将管理内存进行划分：---------各个线程共享区域-------------方法区：        方法">
+  <meta name="description" content="使用场景 线程本地变量，通过将threadlocal.set(variables)，达到线程之间变量隔离的效果。   一旦变量塞入到threadlocal方便在整个线程使用周期内，需要variables，可以用threadlocal.get()获得该变量。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java内存区域详解">
-<meta property="og:url" content="http://yoursite.com/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/index.html">
+<meta property="og:title" content="再谈ThreadLocal">
+<meta property="og:url" content="http://yoursite.com/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="Java虚拟机是如何使用内存的？ 内存空间的分配？以及每块区域都是干嘛的，哪些是线程隔离的？  123456789101112131415161718192021222324252627282930313233343536373839404142Java虚拟机在执行一个Java应用的时候，会将管理内存进行划分：---------各个线程共享区域-------------方法区：        方法">
+<meta property="og:description" content="使用场景 线程本地变量，通过将threadlocal.set(variables)，达到线程之间变量隔离的效果。   一旦变量塞入到threadlocal方便在整个线程使用周期内，需要variables，可以用threadlocal.get()获得该变量。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-01-26T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-11-04T11:33:16.229Z">
+<meta property="article:published_time" content="2020-08-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-06T03:25:34.614Z">
 <meta property="article:author" content="doubleyao">
-<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="ThradLocal">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/">
+<link rel="canonical" href="http://yoursite.com/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/">
 
 
 <script id="page-configurations">
@@ -71,7 +71,7 @@
   };
 </script>
 
-  <title>Java内存区域详解 | DoubleYao&HebeHo's Blog</title>
+  <title>再谈ThreadLocal | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -199,7 +199,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Java内存区域详解
+          再谈ThreadLocal
         </h1>
 
         <div class="post-meta">
@@ -209,14 +209,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-01-27 00:00:00" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
+              <time title="创建时间：2020-08-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-21T00:00:00+08:00">2020-08-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-04 19:33:16" itemprop="dateModified" datetime="2020-11-04T19:33:16+08:00">2020-11-04</time>
+                <time title="修改时间：2020-11-06 11:25:34" itemprop="dateModified" datetime="2020-11-06T11:25:34+08:00">2020-11-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -224,8 +224,8 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/JVM%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">JVM技术</span>
+                  <a href="/categories/%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">并发</span>
                   </a>
                 </span>
             </span>
@@ -241,21 +241,31 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="Java虚拟机是如何使用内存的？"><a href="#Java虚拟机是如何使用内存的？" class="headerlink" title="Java虚拟机是如何使用内存的？"></a>Java虚拟机是如何使用内存的？</h3><ol>
-<li>内存空间的分配？以及每块区域都是干嘛的，哪些是线程隔离的？</li>
+        <h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
+<li>线程本地变量，通过将threadlocal.set(variables)，达到线程之间变量隔离的效果。</li>
+</ul>
+<ul>
+<li>一旦变量塞入到threadlocal方便在整个线程使用周期内，需要variables，可以用threadlocal.get()获得该变量。</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="底层数据结构"><a href="#底层数据结构" class="headerlink" title="底层数据结构"></a>底层数据结构</h3><p>我们应该熟知一个hashmap，本质是把&lt;k,v&gt;设置成一个entry，放到hashmap中的。</p>
+<p>关于threadlocal.set(variables)，底层的数据结构值得一看。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">static class ThreadLocalMap &#123;</span><br><span class="line"></span><br><span class="line">    private Entry[] table;</span><br><span class="line"></span><br><span class="line">    static class Entry extends WeakReference&lt;ThreadLocal&lt;?&gt;&gt; &#123;</span><br><span class="line">        &#x2F;** The value associated with this ThreadLocal. *&#x2F;</span><br><span class="line">        Object value;</span><br><span class="line"></span><br><span class="line">        Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">            super(k);</span><br><span class="line">            value &#x3D; v;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>hashmap的底层是数组+链表实现的，而threadlocalMap底层是基于一个Entry的数组实现，其中Entry的key就是threadlocal，value就是我们set进去的变量。</p>
+<h3 id="为什么Threadlocal设置成static"><a href="#为什么Threadlocal设置成static" class="headerlink" title="为什么Threadlocal设置成static"></a>为什么Threadlocal设置成static</h3><p>避免内存的浪费。</p>
+<p>如果把threadlocal设置为某个类的实例变量（而不是静态变量），每创建一个新的类实例，就会导致一个新的TSO实例被创建。造成内存的浪费。</p>
+<h3 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h3><h4 id="弱引用的引入"><a href="#弱引用的引入" class="headerlink" title="弱引用的引入"></a>弱引用的引入</h4><p>仔细观察源码，ThreadLocalMap的Entry的Key，是一个弱引用，为什么设置成弱引用呢？</p>
+<p>由于ThreadLocalMap的生命周期跟Thread一样长，如果没有手动地删除对应的key,也就是ThreadLocal，都会导致内存泄漏。使用弱引用多一层保障，弱引用嘛，一旦gc被扫描到就会被回收了，那么这个时候，entry就会变成&lt;null,value&gt;，这类entry被称为 stale entry（不新鲜的),这类不新鲜的entry，会在下一次调用set,get,remove的时候，被清理。<br>典型方法：expungeStaleEntry，但是为了保险起见，每次使用完threadLocal,都要调用它的remove方法，清除数据。</p>
+<h4 id="内存泄漏的思考"><a href="#内存泄漏的思考" class="headerlink" title="内存泄漏的思考"></a>内存泄漏的思考</h4><p>设置成弱应用会发生内存泄漏吗？</p>
+<p>本身弱引用的key，一旦被扫描到，就会被回收。Entry便会变成&lt;null,value&gt;，这类Entry称为不新鲜的Entry。</p>
+<h4 id="开放定址法的设计"><a href="#开放定址法的设计" class="headerlink" title="开放定址法的设计"></a>开放定址法的设计</h4><p>巧妙设计，开放定址法（一旦发生了冲突，就去寻找下一个空的散列地址），线性探测</p>
+<p>选择开放定址法原因：</p>
+<ol>
+<li>虽然开放定址法可能会存在多次冲突的现象，但是threadlocal采用神奇数字，让哈希码能均匀分布在2的N次方的数组里。</li>
+<li>往往存的数据量不大的，并且key是弱引用，会被垃圾回收。比较节省空间。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">Java虚拟机在执行一个Java应用的时候，会将管理内存进行划分：</span><br><span class="line"></span><br><span class="line">---------各个线程共享区域-------------</span><br><span class="line"></span><br><span class="line">方法区：</span><br><span class="line">    </span><br><span class="line">    方法区是JVM的规范&lt;永久代是hotspot的一种实现&gt;，</span><br><span class="line">    </span><br><span class="line">    这里存放着</span><br><span class="line">    </span><br><span class="line">    已经被虚拟机加载的类型信息、静态变量、</span><br><span class="line">    </span><br><span class="line">    即时编译器编译后的代码缓存数据。</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">堆区：</span><br><span class="line"></span><br><span class="line">    存放对象实例，</span><br><span class="line">    </span><br><span class="line">    几乎所有的对象都在这里分配内存，</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    如果开启了逃逸分析，对象也可能在栈上分配。</span><br><span class="line">    </span><br><span class="line">    jdk1.7之前字符串常量池存放在方法区，jdk1.7,1.8之后字符串常量存放在堆中了</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">---------各线程隔离区域-------------</span><br><span class="line"></span><br><span class="line">虚拟机栈：</span><br><span class="line"></span><br><span class="line">描述的是Java方法执行的线程内存模型：</span><br><span class="line"></span><br><span class="line">保存方法的局部变量表、操作数栈、动态链接、方法出口等信息</span><br><span class="line"></span><br><span class="line">本地方法栈：</span><br><span class="line"></span><br><span class="line">    与虚拟机栈发挥的作用类似</span><br><span class="line"></span><br><span class="line">程序计数器：</span><br><span class="line">    </span><br><span class="line">    当前线程执行的字节码行号指示器，分支、循环、跳转等都从这里过</span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>在空间上，jdk1.8 与 1.7的区别</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在空间上，jdk1.7 hotspot虚拟机针对方法区，实现了永久代，</span><br><span class="line"></span><br><span class="line">它是堆区的一部分。jdk1.8之后就把永久代去除了，</span><br><span class="line"></span><br><span class="line">用了**元空间**来替换**永久代**。</span><br></pre></td></tr></table></figure>
-
-
-<p>参考链接：</p>
-<p><a href="https://www.cnblogs.com/jjfan0327/p/12778954.html" target="_blank" rel="noopener">https://www.cnblogs.com/jjfan0327/p/12778954.html</a></p>
-<p><a href="https://juejin.im/entry/6844903858003509255" target="_blank" rel="noopener">https://juejin.im/entry/6844903858003509255</a></p>
 
     </div>
 
@@ -265,7 +275,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/JVM/" rel="tag"># JVM</a>
+              <a href="/tags/ThradLocal/" rel="tag"># ThradLocal</a>
           </div>
 
         
@@ -274,12 +284,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/01/27/index/" rel="prev" title="写在2020年的春节">
-      <i class="fa fa-chevron-left"></i> 写在2020年的春节
+    <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" rel="prev" title="关于ThreadLocal的思考">
+      <i class="fa fa-chevron-left"></i> 关于ThreadLocal的思考
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" rel="next" title="关于ThreadLocal的思考">
-      关于ThreadLocal的思考 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/" rel="next" title="一次借鉴鹰眼的实践">
+      一次借鉴鹰眼的实践 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -340,7 +350,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java虚拟机是如何使用内存的？"><span class="nav-number">1.</span> <span class="nav-text">Java虚拟机是如何使用内存的？</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用场景"><span class="nav-number">1.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层数据结构"><span class="nav-number">2.</span> <span class="nav-text">底层数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么Threadlocal设置成static"><span class="nav-number">3.</span> <span class="nav-text">为什么Threadlocal设置成static</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计思路"><span class="nav-number">4.</span> <span class="nav-text">设计思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#弱引用的引入"><span class="nav-number">4.1.</span> <span class="nav-text">弱引用的引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存泄漏的思考"><span class="nav-number">4.2.</span> <span class="nav-text">内存泄漏的思考</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开放定址法的设计"><span class="nav-number">4.3.</span> <span class="nav-text">开放定址法的设计</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

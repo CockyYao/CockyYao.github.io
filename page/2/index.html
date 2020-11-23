@@ -183,6 +183,180 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">关于ThreadLocal的思考</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-21T00:00:00+08:00">2020-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-22 10:55:58" itemprop="dateModified" datetime="2020-05-22T10:55:58+08:00">2020-05-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95/" itemprop="url" rel="index">
+                    <span itemprop="name">技术发展</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。</p>
+<h4 id="如何使用？"><a href="#如何使用？" class="headerlink" title="如何使用？"></a>如何使用？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">public static void setId(String id) &#123;</span><br><span class="line">    if(StringUtils.isBlank(id))&#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    MDC.put(&quot;id&quot;, id);</span><br><span class="line">    idThreadLocal.set(id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static String getId() &#123;</span><br><span class="line">    return idThreadLocal.get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static void clear() &#123;</span><br><span class="line">    idThreadLocal.remove();;</span><br><span class="line">    MDC.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/" class="post-title-link" itemprop="url">Java内存区域详解</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-27 00:00:00" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-04 19:33:16" itemprop="dateModified" datetime="2020-11-04T19:33:16+08:00">2020-11-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">JVM技术</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="Java虚拟机是如何使用内存的？"><a href="#Java虚拟机是如何使用内存的？" class="headerlink" title="Java虚拟机是如何使用内存的？"></a>Java虚拟机是如何使用内存的？</h3><ol>
+<li>内存空间的分配？以及每块区域都是干嘛的，哪些是线程隔离的？</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">Java虚拟机在执行一个Java应用的时候，会将管理内存进行划分：</span><br><span class="line"></span><br><span class="line">---------各个线程共享区域-------------</span><br><span class="line"></span><br><span class="line">方法区：</span><br><span class="line">    </span><br><span class="line">    方法区是JVM的规范&lt;永久代是hotspot的一种实现&gt;，</span><br><span class="line">    </span><br><span class="line">    这里存放着</span><br><span class="line">    </span><br><span class="line">    已经被虚拟机加载的类型信息、静态变量、</span><br><span class="line">    </span><br><span class="line">    即时编译器编译后的代码缓存数据。</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">堆区：</span><br><span class="line"></span><br><span class="line">    存放对象实例，</span><br><span class="line">    </span><br><span class="line">    几乎所有的对象都在这里分配内存，</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    如果开启了逃逸分析，对象也可能在栈上分配。</span><br><span class="line">    </span><br><span class="line">    jdk1.7之前字符串常量池存放在方法区，jdk1.7,1.8之后字符串常量存放在堆中了</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">---------各线程隔离区域-------------</span><br><span class="line"></span><br><span class="line">虚拟机栈：</span><br><span class="line"></span><br><span class="line">描述的是Java方法执行的线程内存模型：</span><br><span class="line"></span><br><span class="line">保存方法的局部变量表、操作数栈、动态链接、方法出口等信息</span><br><span class="line"></span><br><span class="line">本地方法栈：</span><br><span class="line"></span><br><span class="line">    与虚拟机栈发挥的作用类似</span><br><span class="line"></span><br><span class="line">程序计数器：</span><br><span class="line">    </span><br><span class="line">    当前线程执行的字节码行号指示器，分支、循环、跳转等都从这里过</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>在空间上，jdk1.8 与 1.7的区别</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在空间上，jdk1.7 hotspot虚拟机针对方法区，实现了永久代，</span><br><span class="line"></span><br><span class="line">它是堆区的一部分。jdk1.8之后就把永久代去除了，</span><br><span class="line"></span><br><span class="line">用了**元空间**来替换**永久代**。</span><br></pre></td></tr></table></figure>
+
+
+<p>参考链接：</p>
+<p><a href="https://www.cnblogs.com/jjfan0327/p/12778954.html" target="_blank" rel="noopener">https://www.cnblogs.com/jjfan0327/p/12778954.html</a></p>
+<p><a href="https://juejin.im/entry/6844903858003509255" target="_blank" rel="noopener">https://juejin.im/entry/6844903858003509255</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/index/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -326,7 +500,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -339,7 +513,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

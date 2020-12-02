@@ -46,20 +46,20 @@
   };
 </script>
 
-  <meta name="description" content="百万级微服务互相调用，出了问题谁负责？ 打日志，谁接口有问题找谁？ 我咋知道谁接口有问题？ 如下： 1埋点+无缝透传">
+  <meta name="description" content="一条消息发送到broker，它是怎么存储的？kafka是怎么去检索这些消息的呢？">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一次借鉴鹰眼的实践">
-<meta property="og:url" content="http://yoursite.com/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/index.html">
+<meta property="og:title" content="消息存储之kafka&amp;rocketmq">
+<meta property="og:url" content="http://yoursite.com/2020/10/22/%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B9%8Bkafka%E5%92%8Crocketmq/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="百万级微服务互相调用，出了问题谁负责？ 打日志，谁接口有问题找谁？ 我咋知道谁接口有问题？ 如下： 1埋点+无缝透传">
+<meta property="og:description" content="一条消息发送到broker，它是怎么存储的？kafka是怎么去检索这些消息的呢？">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-09-20T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-11-04T15:34:56.040Z">
+<meta property="article:published_time" content="2020-10-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-02T06:19:28.318Z">
 <meta property="article:author" content="doubleyao">
-<meta property="article:tag" content="日志追踪">
+<meta property="article:tag" content="kafka">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/">
+<link rel="canonical" href="http://yoursite.com/2020/10/22/%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B9%8Bkafka%E5%92%8Crocketmq/">
 
 
 <script id="page-configurations">
@@ -71,7 +71,7 @@
   };
 </script>
 
-  <title>一次借鉴鹰眼的实践 | DoubleYao&HebeHo's Blog</title>
+  <title>消息存储之kafka&rocketmq | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/22/%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B9%8Bkafka%E5%92%8Crocketmq/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -199,7 +199,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          一次借鉴鹰眼的实践
+          消息存储之kafka&rocketmq
         </h1>
 
         <div class="post-meta">
@@ -209,14 +209,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-09-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-21T00:00:00+08:00">2020-09-21</time>
+              <time title="创建时间：2020-10-22 00:00:00" itemprop="dateCreated datePublished" datetime="2020-10-22T00:00:00+08:00">2020-10-22</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-04 23:34:56" itemprop="dateModified" datetime="2020-11-04T23:34:56+08:00">2020-11-04</time>
+                <time title="修改时间：2020-12-02 14:19:28" itemprop="dateModified" datetime="2020-12-02T14:19:28+08:00">2020-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -241,45 +241,23 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>百万级微服务互相调用，出了问题谁负责？</p>
-<p>打日志，谁接口有问题找谁？</p>
-<p>我咋知道谁接口有问题？</p>
-<p>如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">埋点+无缝透传</span><br></pre></td></tr></table></figure>
-
+        <p>一条消息发送到broker，它是怎么存储的？kafka是怎么去检索这些消息的呢？</p>
 <a id="more"></a>
 
-<ol>
-<li>故障定位难，</li>
-</ol>
-<p>某个提交工单的按钮，涉及多个自动化的任务，每个任务涉及api的调用，kafka消息的三方消费等，一旦工单出现问题，最坏情况需要拉上好多人一起看问题。</p>
-<ol start="2">
-<li>链路梳理难</li>
-</ol>
-<p>夸父平台涉及三大子系统（kuafu、workflow、appops），每个子系统之间含有(web,task,api等应用)，通常一个工单的提交涉及多个子系统的工单协作。</p>
-<ol start="3">
-<li>资源浪费多，</li>
-</ol>
-<p>某一个调用比较耗时，可能涉及到多个http调用，并且kafka消息的通信，如何排查一个问题的，进行相应的性能优化？是非常关键的。</p>
-<h3 id="Trace日志链路功能"><a href="#Trace日志链路功能" class="headerlink" title="Trace日志链路功能"></a>Trace日志链路功能</h3><h4 id="日志打印"><a href="#日志打印" class="headerlink" title="日志打印"></a>日志打印</h4><p>每一个工单的提交、会产生一个唯一性工单id，</p>
-<p>随着工单的提交，涉及表单变量的处理、流程实例启动、kafka消息推送，http请求的调用等等，在介入第三方系统的部分，如http请求调用，进行日志的打印。</p>
-<ol>
-<li><p>首先我们在打印日志的上下文，把工单的id的set到slf4j的MDC(Mapped Diagorse Context)中，</p>
-</li>
-<li><p>在打印完日志之后，进行清理。</p>
-</li>
-</ol>
-<p>MDC是一个线程安全的诊断日志容器，在打印日志前：将日志的uuid 放入到上下文中，这个uuid会随着日志一起打印出来。</p>
-<h4 id="指令下发"><a href="#指令下发" class="headerlink" title="指令下发"></a>指令下发</h4><p>写好一段脚本，运用线程池起多线程将该脚本进行指令下发至夸父应用的服务器上，即可将日志进行采集，打印在页面上，便于问题的快速排查。</p>
-<p>线程池的参数配置技巧：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@PostConstruct</span><br><span class="line"> public void init() &#123;</span><br><span class="line">     executor &#x3D; new ThreadPoolExecutor(20, 20, 1,</span><br><span class="line">             TimeUnit.MINUTES, new ArrayBlockingQueue&lt;&gt;(100));</span><br><span class="line">     &#x2F;&#x2F; 核心线程数开启超时回收策略</span><br><span class="line">     executor.allowCoreThreadTimeOut(true);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> @PreDestroy</span><br><span class="line"> public void destroy() &#123;</span><br><span class="line">     if (executor !&#x3D; null) &#123;</span><br><span class="line">         executor.shutdown();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Kafka消息存储机制"><a href="#Kafka消息存储机制" class="headerlink" title="Kafka消息存储机制"></a>Kafka消息存储机制</h3><p>topic下面有多个partition，针对多个partition，每个partition下有多个segment，segment下面有真正的日志文件，日志文件分成*.log类型的数据文件, *.index的索引文件， *.timeIndex的时间戳索引文件。</p>
+<h3 id="与rocketmq对比"><a href="#与rocketmq对比" class="headerlink" title="与rocketmq对比"></a>与rocketmq对比</h3><h4 id="topic-partition对性能影响"><a href="#topic-partition对性能影响" class="headerlink" title="topic/partition对性能影响"></a>topic/partition对性能影响</h4><p>kafka中，每个topic_partition一个文件，虽然每个文件是顺序IO，但是topic/partition数目一多，文件的顺序I/O，表现到磁盘上，还是随机的IO。</p>
+<p>根据淘宝官方介绍，kafka的无限消息堆积、高效的持久化速度吸引了我们，但是你会发现kafka主要定位于日志传输，对于使用在淘宝交易、订单、充值等场景上，有一些改善的地方，于是有了rocketmq。</p>
+<h4 id="刷盘机制"><a href="#刷盘机制" class="headerlink" title="刷盘机制"></a>刷盘机制</h4><p>kafka消息的同步刷盘</p>
+<h4 id="消费并行度"><a href="#消费并行度" class="headerlink" title="消费并行度"></a>消费并行度</h4><p>kafka指定一个partition只有一个消费者消费，比如你有8个partition，那么最多你将有8个consumer消费。</p>
+<p>rocketmq放开了限制，可以不保证消费顺序，也可以多个consumer消费同一个queue，极大提高消费并行度。</p>
+<h3 id="RocketMq消息存储"><a href="#RocketMq消息存储" class="headerlink" title="RocketMq消息存储"></a>RocketMq消息存储</h3><p>rocketmq直接操作文件系统来提升存储效率,采用单一日志方式，将同一台机器上面的所有topic的所有queue消息，存在一起，保证磁盘顺序写。</p>
+<p>然后起异步线程将commit log同步到commit queue</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- commit log</span><br><span class="line"></span><br><span class="line">固定大小，每个1g，存储消息内容</span><br><span class="line"></span><br><span class="line">- commit queue</span><br><span class="line"></span><br><span class="line">一个topic可能有多个commit queue</span><br><span class="line"></span><br><span class="line">每个文件代表一个逻辑队列，</span><br><span class="line"></span><br><span class="line">内部存储一些</span><br><span class="line"></span><br><span class="line">commit log offset + size + tag hashcode</span><br><span class="line"></span><br><span class="line">- index</span><br><span class="line"></span><br><span class="line">索引文件</span><br><span class="line"></span><br><span class="line">给定topic + key，方便问题排查</span><br></pre></td></tr></table></figure>
 
 
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>这里简单地实现了这种思路，但是对日志代码是有侵入的，如何无侵入的进行日志的管理和分析，我觉得有待思考。</p>
-<p>阿里鹰眼系统</p>
-<p><a href="https://www.infoq.cn/article/kMPZTgJqs7VJC5vkVCR2" target="_blank" rel="noopener">https://www.infoq.cn/article/kMPZTgJqs7VJC5vkVCR2</a></p>
-<p><a href="https://www.cnblogs.com/gzxbkk/p/9600263.html" target="_blank" rel="noopener">https://www.cnblogs.com/gzxbkk/p/9600263.html</a></p>
-<p><a href="https://www.cnblogs.com/zhengyun_ustc/p/55solution2.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhengyun_ustc/p/55solution2.html</a></p>
+
+<h3 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀"></a>巨人的肩膀</h3><p><a href="https://blog.51cto.com/13925625/2276357" target="_blank" rel="noopener">https://blog.51cto.com/13925625/2276357</a></p>
+<p><a href="https://tinylcy.me/2019/the-design-of-rocketmq-message-storage-system/" target="_blank" rel="noopener">https://tinylcy.me/2019/the-design-of-rocketmq-message-storage-system/</a></p>
 
     </div>
 
@@ -289,7 +267,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%97%A5%E5%BF%97%E8%BF%BD%E8%B8%AA/" rel="tag"># 日志追踪</a>
+              <a href="/tags/kafka/" rel="tag"># kafka</a>
           </div>
 
         
@@ -298,12 +276,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/08/22/RocketMq%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%AE%9E%E7%8E%B0/" rel="prev" title="RocketMq事务消息">
-      <i class="fa fa-chevron-left"></i> RocketMq事务消息
+    <a href="/2020/09/21/dp%E6%80%BB%E7%BB%93/" rel="prev" title="动态规划的思考">
+      <i class="fa fa-chevron-left"></i> 动态规划的思考
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/09/21/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9B%B8%E5%85%B3%E6%80%BB%E7%BB%93/" rel="next" title="细说Java线程池">
-      细说Java线程池 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/11/05/kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%88%86%E6%9E%90/" rel="next" title="kafka生产者分析">
+      kafka生产者分析 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -364,7 +342,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Trace日志链路功能"><span class="nav-number">1.</span> <span class="nav-text">Trace日志链路功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#日志打印"><span class="nav-number">1.1.</span> <span class="nav-text">日志打印</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指令下发"><span class="nav-number">1.2.</span> <span class="nav-text">指令下发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka消息存储机制"><span class="nav-number">1.</span> <span class="nav-text">Kafka消息存储机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与rocketmq对比"><span class="nav-number">2.</span> <span class="nav-text">与rocketmq对比</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#topic-partition对性能影响"><span class="nav-number">2.1.</span> <span class="nav-text">topic&#x2F;partition对性能影响</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#刷盘机制"><span class="nav-number">2.2.</span> <span class="nav-text">刷盘机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#消费并行度"><span class="nav-number">2.3.</span> <span class="nav-text">消费并行度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RocketMq消息存储"><span class="nav-number">3.</span> <span class="nav-text">RocketMq消息存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#巨人的肩膀"><span class="nav-number">4.</span> <span class="nav-text">巨人的肩膀</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

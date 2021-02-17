@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="我认为的排序准备了一段时间的排序总结，终于理了又理，对于这种算法，我认为，要扎实掌握，一方面为了看机会面试，另一方面，的确是程序员最基础的东西。中国人不懂中国人的历史，会被嘲笑，程序员不懂算法，可能也会被嘲笑把。 除了整理这些算法之外，我觉得，整理一方面，另一方面就是要疯狂练习，每天白板编程，手撸一个排序算法。并且针对每个排序算法的结构、容易出错的点，反复踩坑，反复总结，最终融会贯通。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="排序总结系列">
+<meta property="og:url" content="http://yoursite.com/2021/01/21/%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
+<meta property="og:description" content="我认为的排序准备了一段时间的排序总结，终于理了又理，对于这种算法，我认为，要扎实掌握，一方面为了看机会面试，另一方面，的确是程序员最基础的东西。中国人不懂中国人的历史，会被嘲笑，程序员不懂算法，可能也会被嘲笑把。 除了整理这些算法之外，我觉得，整理一方面，另一方面就是要疯狂练习，每天白板编程，手撸一个排序算法。并且针对每个排序算法的结构、容易出错的点，反复踩坑，反复总结，最终融会贯通。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-17T08:13:32.691Z">
+<meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="排序">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2021/01/21/%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>排序总结系列 | DoubleYao&HebeHo's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">DoubleYao&HebeHo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">进击的姚总</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/01/21/%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          排序总结系列
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-01-21T00:00:00+08:00">2021-01-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-17 16:13:32" itemprop="dateModified" datetime="2021-02-17T16:13:32+08:00">2021-02-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="我认为的排序"><a href="#我认为的排序" class="headerlink" title="我认为的排序"></a>我认为的排序</h2><p>准备了一段时间的排序总结，终于理了又理，对于这种算法，我认为，要扎实掌握，一方面为了看机会面试，另一方面，的确是程序员最基础的东西。中国人不懂中国人的历史，会被嘲笑，程序员不懂算法，可能也会被嘲笑把。</p>
+<p>除了整理这些算法之外，我觉得，整理一方面，另一方面就是要疯狂练习，每天白板编程，手撸一个排序算法。并且针对每个排序算法的结构、容易出错的点，反复踩坑，反复总结，最终融会贯通。</p>
+<a id="more"></a>
+
+<h2 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h2><p>时间复杂度: o(nlogn),空间复杂度o(n)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public void sort(int[] arr)&#123;</span><br><span class="line">    sort(arr, 0, arr.length - 1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void sort(int[] arr, int l, int r)&#123;</span><br><span class="line">    </span><br><span class="line">    if(l &lt; r)&#123;</span><br><span class="line">        &#x2F;&#x2F; 这里写成(r-l)&#x2F;2 + l 防止溢出了</span><br><span class="line">        int m &#x3D; l + (r-l)&#x2F;2;</span><br><span class="line">        &#x2F;&#x2F; 对左边子序列排序</span><br><span class="line">        sort(arr, l, m);</span><br><span class="line">        &#x2F;&#x2F; 对右边的子序列排序</span><br><span class="line">        sort(arr, m + 1, r);</span><br><span class="line">        &#x2F;&#x2F; 两个有序序列进行归并</span><br><span class="line">        merge(arr, l, m, r);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void merge(int[] arr, int l, int m, int r)&#123;</span><br><span class="line">    int len &#x3D; r - l + 1;</span><br><span class="line">    int[] temp &#x3D; new int[len];</span><br><span class="line">    int t &#x3D; 0;</span><br><span class="line">    int i &#x3D; l;</span><br><span class="line">    int j &#x3D; m + 1;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 三个while循环</span><br><span class="line">    while(i &lt;&#x3D; m &amp;&amp; j &lt;&#x3D; r)&#123;</span><br><span class="line">        if(arr[i] &lt; arr[j])&#123;</span><br><span class="line">            temp[t++] &#x3D; arr[i++];</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            temp[t++] &#x3D; arr[j++];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    while(i &lt;&#x3D; m)&#123;</span><br><span class="line">        temp[t++] &#x3D; arr[i++];</span><br><span class="line">    &#125;</span><br><span class="line">    while(j &lt;&#x3D; r)&#123;</span><br><span class="line">        temp[t++] &#x3D; arr[j++]; </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这里进行复制</span><br><span class="line">    t &#x3D; 0;</span><br><span class="line">    while(t &lt; len)&#123;</span><br><span class="line">        arr[l++] &#x3D; temp[t++];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h2><p>时间复杂度: o(nlogn),最坏 o(n^2)</p>
+<p>空间复杂度: o(n)</p>
+<p>注意：</p>
+<ol>
+<li>循环条件（等号选择）</li>
+<li>扫描范围</li>
+<li>while架构</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">public void sort(int[] arr)&#123;</span><br><span class="line">    sort(arr, 0, arr.length - 1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void sort(int[] arr, int l, int r)&#123;</span><br><span class="line">    if(l &lt; r)&#123;</span><br><span class="line">        int index &#x3D; getIndex(arr, l, r);</span><br><span class="line">        sort(arr, l, index - 1);</span><br><span class="line">        sort(arr, index + 1, r);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private int getIndex(int[] arr, int l, int r)&#123;</span><br><span class="line">    int t &#x3D; arr[l];</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 注意这里 l &lt; r 并不是 l &lt;&#x3D; r</span><br><span class="line">    &#x2F;&#x2F; 如果取 &#x3D; 的话，令l&#x3D;r, t &#x3D; arr[l] &#x3D; arr[r]</span><br><span class="line">    &#x2F;&#x2F; 显然进入了死循环了</span><br><span class="line">    while(l &lt; r)&#123;</span><br><span class="line">        &#x2F;&#x2F; 从右边开始扫起</span><br><span class="line">        &#x2F;&#x2F; 扫描条件 &gt;&#x3D;</span><br><span class="line">        while(l &lt; r &amp;&amp; arr[r] &gt;&#x3D; t)&#123;</span><br><span class="line">            r--;</span><br><span class="line">        &#125;</span><br><span class="line">        arr[l] &#x3D; arr[r];</span><br><span class="line">        </span><br><span class="line">        while(l &lt; r &amp;&amp; arr[l] &lt;&#x3D; t)&#123;</span><br><span class="line">            l++;</span><br><span class="line">        &#125;</span><br><span class="line">        arr[r] &#x3D; arr[l];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    arr[l] &#x3D; t;</span><br><span class="line">    </span><br><span class="line">    return l;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h3><p>时间复杂度：o(nlogn)<br>空间复杂度：o(1)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">public void sort(int[] arr)&#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 调整数组为堆</span><br><span class="line">    for(int i &#x3D; arr.length&#x2F;2; i&gt;&#x3D;0; i--)&#123;</span><br><span class="line">    </span><br><span class="line">        &#x2F;&#x2F; 左边是一个堆， 右边是一个堆</span><br><span class="line">        &#x2F;&#x2F; 怼上一个节点，使得其成为堆</span><br><span class="line">        adjust(arr, i, arr.length);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 进行选择排序</span><br><span class="line">    for(int i&#x3D;arr.length-1; i &gt; 0;i--)&#123;</span><br><span class="line">        &#x2F;&#x2F; arr[0]是最大的，与最后一个换位置</span><br><span class="line">        swap(arr, 0, i);</span><br><span class="line">        &#x2F;&#x2F; 继续进行堆调整</span><br><span class="line">        adjust(arr, 0, i);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; fIndex，下沉节点的位置</span><br><span class="line">&#x2F;&#x2F; n, 代表节点的范围</span><br><span class="line">public void adjust(int[] arr,int fIndex, int n)&#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 注意循环跳出条件，即不断下沉，父节点存在子树的</span><br><span class="line">    for(int i&#x3D;fIndex; leftChild(i) &lt; n;)&#123;</span><br><span class="line">        </span><br><span class="line">        int bigChild &#x3D; leftChild(i);</span><br><span class="line">        </span><br><span class="line">        &#x2F;&#x2F;  这里注意判断右孩子是否存在，防止越界</span><br><span class="line">        if(bigChild + 1 &lt; n &amp;&amp; arr[bigChild + 1] &gt; arr[bigChild])&#123;</span><br><span class="line">            bigChild ++;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        if(arr[bigChild] &gt; arr[i])&#123;</span><br><span class="line">            swap(arr, i, bigChild);</span><br><span class="line">            &#x2F;&#x2F; 下沉下去, 即往下面走一层</span><br><span class="line">            i &#x3D; bigChild;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public int leftChild(int i)&#123;</span><br><span class="line">    return i*2+1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void swap(int[] arr, int l, int r)&#123;</span><br><span class="line">    int t &#x3D; arr[l];</span><br><span class="line">    arr[l] &#x3D; arr[r];</span><br><span class="line">    arr[r] &#x3D; t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8E%92%E5%BA%8F/" rel="tag"># 排序</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/21/%E9%93%BE%E8%A1%A8%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="prev" title="链表大总结">
+      <i class="fa fa-chevron-left"></i> 链表大总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/17/%E5%A0%86%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="next" title="堆的大总结">
+      堆的大总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#我认为的排序"><span class="nav-number">1.</span> <span class="nav-text">我认为的排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#归并排序"><span class="nav-number">2.</span> <span class="nav-text">归并排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快速排序"><span class="nav-number">3.</span> <span class="nav-text">快速排序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#堆排序"><span class="nav-number">3.1.</span> <span class="nav-text">堆排序</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">doubleyao</p>
+  <div class="site-description" itemprop="description">就是干</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doubleyao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

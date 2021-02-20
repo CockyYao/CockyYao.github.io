@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="说明这篇文章，先从算法角度，实现了LRU和LFU，然后结合redis在LRU和LFU上的操作，进行了具体分析。 尤其是LFU的代码实现，确实花了很长时间调试，也踩了很多坑。这篇文章做一个总结把。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="谈谈LRU和LFU">
+<meta property="og:url" content="http://yoursite.com/2021/01/21/LFU%E5%92%8CLRU%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
+<meta property="og:description" content="说明这篇文章，先从算法角度，实现了LRU和LFU，然后结合redis在LRU和LFU上的操作，进行了具体分析。 尤其是LFU的代码实现，确实花了很长时间调试，也踩了很多坑。这篇文章做一个总结把。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-20T17:30:36.043Z">
+<meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="重复元素">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2021/01/21/LFU%E5%92%8CLRU%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>谈谈LRU和LFU | DoubleYao&HebeHo's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">DoubleYao&HebeHo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">进击的姚总</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/01/21/LFU%E5%92%8CLRU%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          谈谈LRU和LFU
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-01-21T00:00:00+08:00">2021-01-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-21 01:30:36" itemprop="dateModified" datetime="2021-02-21T01:30:36+08:00">2021-02-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p>这篇文章，先从算法角度，实现了LRU和LFU，然后结合redis在LRU和LFU上的操作，进行了具体分析。</p>
+<p>尤其是LFU的代码实现，确实花了很长时间调试，也踩了很多坑。这篇文章做一个总结把。</p>
+<a id="more"></a>
+
+<h3 id="LRU实现"><a href="#LRU实现" class="headerlink" title="LRU实现"></a>LRU实现</h3><p>LRU：Least recently used, 最近最少使用。 根据访问频率来，最久没有被访问的，未来被访问的概率也很低，将会被删除了。</p>
+<h4 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h4><p>直接使用LinkedHashMap实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; LinkedHashMap按照访问顺序排序</span><br><span class="line">public class LRU extends LinkedHashMap&lt;Integer, Integer&gt;&#123;</span><br><span class="line">    </span><br><span class="line">    private int capacity;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 构造方法</span><br><span class="line">    public LRU(int capacity)&#123;</span><br><span class="line">        this.capacity &#x3D; capacity;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 获取到value</span><br><span class="line">    public int get(int key)&#123;</span><br><span class="line">        return super.getOrDefault(key, -1);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 存入缓存</span><br><span class="line">    public void put(int key, int value)&#123;</span><br><span class="line">        super.put(key, value);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    protected void removeEldestEntry(Map.Entry&lt;Integer, Integer&gt; eldest)&#123;</span><br><span class="line">        return size() &gt; capacity;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h4><p>HashMap + 双向链表</p>
+<p>其中hashMap用来存放k,v，当我们访问一个节点的时候（put或者get），都要把这个节点放到链表的头部，保证双向链表按照访问顺序排列。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line">public class MyLRUCache &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    private int capacity;</span><br><span class="line"></span><br><span class="line">    private Map&lt;Integer, DLinkNode&gt; map;</span><br><span class="line"></span><br><span class="line">    private DLinkNode head;</span><br><span class="line"></span><br><span class="line">    private DLinkNode tail;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public MyLRUCache(int capacity) &#123;</span><br><span class="line">        this.capacity &#x3D; capacity;</span><br><span class="line">        map &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        tail &#x3D; new DLinkNode();</span><br><span class="line">        head &#x3D; new DLinkNode();</span><br><span class="line">        head.post &#x3D; tail;</span><br><span class="line">        head.pre &#x3D; null;</span><br><span class="line">        tail.pre &#x3D; head;</span><br><span class="line">        tail.post &#x3D; null;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public void put(int key, int val) &#123;</span><br><span class="line">        DLinkNode node &#x3D; map.get(key);</span><br><span class="line">        if (node &#x3D;&#x3D; null) &#123;</span><br><span class="line">            DLinkNode linkNode &#x3D; new DLinkNode(val);</span><br><span class="line">            map.put(key, linkNode);</span><br><span class="line">            insertToHead(linkNode);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            node.val &#x3D; val;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (size() &gt; capacity) &#123;</span><br><span class="line">            DLinkNode tail &#x3D; removeTail();</span><br><span class="line">            map.remove(tail.key);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int get(int key) &#123;</span><br><span class="line">        DLinkNode node &#x3D; map.get(key);</span><br><span class="line">        if (node &#x3D;&#x3D; null) &#123;</span><br><span class="line">            return -1;</span><br><span class="line">        &#125;</span><br><span class="line">        int val &#x3D; node.val;</span><br><span class="line">        &#x2F;&#x2F; 放到头节点</span><br><span class="line">        pushToHead(node);</span><br><span class="line">        return val;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 移动某个节点至头节点</span><br><span class="line">    private void pushToHead(DLinkNode node) &#123;</span><br><span class="line">        node.pre &#x3D; head;</span><br><span class="line">        node.post &#x3D; head.post;</span><br><span class="line">        head.post.pre &#x3D; node;</span><br><span class="line">        head.post &#x3D; node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 插入某个节点至头节点</span><br><span class="line">    private void insertToHead(DLinkNode node) &#123;</span><br><span class="line">        DLinkNode headPost &#x3D; head.post;</span><br><span class="line">        head.post &#x3D; node;</span><br><span class="line">        node.pre &#x3D; head;</span><br><span class="line">        node.post &#x3D; headPost;</span><br><span class="line">        headPost.pre &#x3D; node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * Remove an existing node from the linked list.</span><br><span class="line">     *&#x2F;</span><br><span class="line">    private void removeNode(DLinkNode node)&#123;</span><br><span class="line">        DLinkNode pre &#x3D; node.pre;</span><br><span class="line">        DLinkNode post &#x3D; node.post;</span><br><span class="line"></span><br><span class="line">        pre.post &#x3D; post;</span><br><span class="line">        post.pre &#x3D; pre;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 删除尾节点</span><br><span class="line">    private DLinkNode removeTail() &#123;</span><br><span class="line">        DLinkNode tailPre &#x3D; tail.pre;</span><br><span class="line">        DLinkNode tailPrePre &#x3D; tailPre.pre;</span><br><span class="line">        tailPrePre.post &#x3D; tail;</span><br><span class="line">        tail.pre &#x3D; tailPrePre;</span><br><span class="line">        return tailPre;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private int size()&#123;</span><br><span class="line">        return map.keySet().size();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public static class DLinkNode&#123;</span><br><span class="line"></span><br><span class="line">        public int key;</span><br><span class="line"></span><br><span class="line">        public int val;</span><br><span class="line"></span><br><span class="line">        public DLinkNode pre;</span><br><span class="line"></span><br><span class="line">        public DLinkNode post;</span><br><span class="line"></span><br><span class="line">        public DLinkNode()&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public DLinkNode(int val)&#123;</span><br><span class="line">            this.val &#x3D; val;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="LFU实现"><a href="#LFU实现" class="headerlink" title="LFU实现"></a>LFU实现</h3><p>LFU：Least Frequency Used， 按照访问的次数来，每次淘汰的时候，淘汰一部分访问次数较少的数据，如果访问次数一致的话，那么淘汰最久没有被访问的数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line">public class LFU &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 存放key, Node</span><br><span class="line">    private Map&lt;Integer, Node&gt; cache;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 存放 &lt;访问次数，相同访问次数的集合&gt;</span><br><span class="line">    private Map&lt;Integer, LinkedHashSet&lt;Node&gt;&gt; freqs;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 最小访问次数，非常重要</span><br><span class="line">    private int minFreq;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 缓存的容量</span><br><span class="line">    private int capacity;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    LFU(int capacity)&#123;</span><br><span class="line"></span><br><span class="line">        this.capacity &#x3D; capacity;</span><br><span class="line"></span><br><span class="line">        cache &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        freqs &#x3D; new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        minFreq &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int get(int key)&#123;</span><br><span class="line">        Node node &#x3D; cache.get(key);</span><br><span class="line">        if(node &#x3D;&#x3D; null)&#123;</span><br><span class="line">            return -1;</span><br><span class="line">        &#125;</span><br><span class="line">        updateAfterGet(node, node.value);</span><br><span class="line">        return node.value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public void put(int key, int val) &#123;</span><br><span class="line">        if(capacity &#x3D;&#x3D; 0)&#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        if (cache.containsKey(key)) &#123;</span><br><span class="line">            Node node &#x3D; cache.get(key);</span><br><span class="line">            &#x2F;&#x2F; 这里尤其要注意的</span><br><span class="line">            &#x2F;&#x2F; 因为更新值，所以需要把原来的删除掉，传一个新的值进去，所以updateAfterGet方法，加了一个参数</span><br><span class="line">            updateAfterGet(node, val);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            checkBeforeInsert();</span><br><span class="line">            doInsert(key, val);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void checkBeforeInsert() &#123;</span><br><span class="line">        if (cache.size() &#x3D;&#x3D; capacity) &#123;</span><br><span class="line">            LinkedHashSet&lt;Node&gt; set &#x3D; freqs.get(minFreq);</span><br><span class="line">            Iterator&lt;Node&gt; it &#x3D; set.iterator();</span><br><span class="line">            Node node &#x3D; it.next();</span><br><span class="line">            it.remove();</span><br><span class="line">            if (set.isEmpty()) &#123;</span><br><span class="line">                freqs.remove(minFreq);</span><br><span class="line">            &#125;</span><br><span class="line">            cache.remove(node.key);</span><br><span class="line">            updateMinFreq();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void doInsert(int key, int val) &#123;</span><br><span class="line">        cache.put(key, new Node(key, val, 1));</span><br><span class="line">        LinkedHashSet set &#x3D; freqs.getOrDefault(1, new LinkedHashSet&lt;&gt;());</span><br><span class="line">        set.add(new Node(key, val, 1));</span><br><span class="line">        freqs.put(1, set);</span><br><span class="line">        updateMinFreq();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#x2F;*</span><br><span class="line">     *</span><br><span class="line">     *</span><br><span class="line">     * *&#x2F;</span><br><span class="line">    private void updateAfterGet(Node node, int newValue) &#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 删除原来的老节点</span><br><span class="line">        LinkedHashSet&lt;Node&gt; set &#x3D; freqs.get(node.freq);</span><br><span class="line">        &#x2F;&#x2F; 这里是引用传递，传递进来的是cache中的node，不能用set.remove()去操作的</span><br><span class="line">        &#x2F;&#x2F; set.remove(node);</span><br><span class="line">        Iterator&lt;Node&gt; it &#x3D; set.iterator();</span><br><span class="line">        while (it.hasNext()) &#123;</span><br><span class="line">            Node node1 &#x3D; it.next();</span><br><span class="line">            if (node1.key &#x3D;&#x3D; node.key &amp;&amp; node1.value &#x3D;&#x3D; node.value) &#123;</span><br><span class="line">                it.remove();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (set.isEmpty()) &#123;</span><br><span class="line">            freqs.remove(node.freq);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 新增一个频次节点</span><br><span class="line">        LinkedHashSet&lt;Node&gt; toSet &#x3D; freqs.getOrDefault(node.freq + 1, new LinkedHashSet&lt;&gt;());</span><br><span class="line">        toSet.add(new Node(node.key, newValue, node.freq + 1));</span><br><span class="line">        freqs.put(node.freq + 1, toSet);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 引用传递</span><br><span class="line">        node.freq++;</span><br><span class="line">        node.value &#x3D; newValue;</span><br><span class="line">        &#x2F;&#x2F; 更新最小访问次数</span><br><span class="line">        updateMinFreq();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void updateMinFreq()&#123;</span><br><span class="line">        if(freqs &#x3D;&#x3D;  null || freqs.size() &#x3D;&#x3D; 0)&#123;</span><br><span class="line">            minFreq &#x3D; 0;</span><br><span class="line">        &#125;else &#123;</span><br><span class="line">            minFreq &#x3D; Collections.min(freqs.keySet());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public class Node&#123;</span><br><span class="line">        int key;</span><br><span class="line">        int value;</span><br><span class="line">        int freq;</span><br><span class="line">        public Node(int key, int value, int freq)&#123;</span><br><span class="line">            this.key &#x3D; key;</span><br><span class="line">            this.value &#x3D; value;</span><br><span class="line">            this.freq &#x3D; freq;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>手撸一个LFU，总结需要注意以下几个点;</p>
+<ul>
+<li>minFreq很关键，记得要实时更新</li>
+<li>LinkedHashSet删除节点时，注意引用传递问题</li>
+<li>put更新的时候，删除旧的，新增新的，需要注意把新值传递过去。</li>
+</ul>
+<p>综上：Java的引用传递问题。</p>
+<h3 id="Redis的LRU是怎么实现的？"><a href="#Redis的LRU是怎么实现的？" class="headerlink" title="Redis的LRU是怎么实现的？"></a>Redis的LRU是怎么实现的？</h3><p>redis提供了丰富的缓存淘汰策略，其中就支持一种LRU，包含了volatile-lru(对包含过期时间key进行LRU算法淘汰)、allkeys-lru(对所有的key做LRU清除)。</p>
+<p>如果redis的LRU也按照hashMap+双向链表，显然不符合性能的要求。那么redis是怎么实现的？</p>
+<ul>
+<li>redis底层为每个redisObject维护了一个24位的时间戳，记录对象最近被访问的时间，</li>
+<li>redis在全局中，维持了一个24位的全局时钟，</li>
+</ul>
+<p>通过这两个时间做差，就可以得到对象的空闲时间，空闲时间最大的就是需要被淘汰的对象。</p>
+<h4 id="淘汰流程"><a href="#淘汰流程" class="headerlink" title="淘汰流程"></a>淘汰流程</h4><ul>
+<li>触发淘汰(缓存达到最大值)</li>
+<li>更新回收池<ul>
+<li>随机取出一定数量(可配置)的键与回收池中的键，进行空闲时间进行比较。维持大顶堆的作用。</li>
+</ul>
+</li>
+<li>从 evictionPool 池中取出 idletime 最大且在字典中存在的键作为 bestkey 执行删除，并且从 evictionPool 池中移除</li>
+</ul>
+<p>回收池本质是一个大顶堆，具体如何更新回收池的，可<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/86501571" target="_blank" rel="noopener">参见详细博客</a></p>
+<h3 id="Redis的LFU是怎么实现的"><a href="#Redis的LFU是怎么实现的" class="headerlink" title="Redis的LFU是怎么实现的?"></a>Redis的LFU是怎么实现的?</h3><p>redis的缓存过期策略也支持lfu，具体有volatile-lfu以及allkeys-lfu。<a href="https://www.modb.pro/db/41628" target="_blank" rel="noopener">参考链接</a></p>
+<p>单纯搞个计数器，去增加redis对象访问次数，这样不合理，比如过期的热点数据很难被淘汰。如果访问次数太多，那么维护count也很麻烦。</p>
+<p>那么redis是怎么做的呢？</p>
+<p>redis记录访问的频率，而不是访问的次数。</p>
+<ul>
+<li><p>首先每一个redis对象，把redis对象的lru字段，拆成两部分，一部分记录访问频率，一部分记录访问时间戳</p>
+</li>
+<li><p>每个对象默认初始化一个访问频率。</p>
+</li>
+<li><p>访问频率的增加与衰减符合Morris counter计数算法，具体的增加与衰减，可以使用redis的具体配置。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lfu-log-factor：指数越大，频率计数器增长越慢。</span><br><span class="line"></span><br><span class="line">lfu-decay-time：衰减因子，概率计数器的减少速度</span><br></pre></td></tr></table></figure>
+
+<p>关于淘汰流程，实际跟redis的LRU是类似的，</p>
+<ul>
+<li>更新回收池《随机采样》</li>
+<li>执行回收</li>
+</ul>
+<h3 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀"></a>巨人的肩膀</h3><p><a href="https://my.oschina.net/lscherish/blog/4467394" target="_blank" rel="noopener">https://my.oschina.net/lscherish/blog/4467394</a><br><a href="https://www.modb.pro/db/41628" target="_blank" rel="noopener">https://www.modb.pro/db/41628</a><br><a href="https://www.cnblogs.com/linxiyue/p/10955533.html" target="_blank" rel="noopener">https://www.cnblogs.com/linxiyue/p/10955533.html</a><br><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/86501571" target="_blank" rel="noopener">https://blog.csdn.net/WhereIsHeroFrom/article/details/86501571</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/" rel="tag"># 重复元素</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/21/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="prev" title="二分查找大总结">
+      <i class="fa fa-chevron-left"></i> 二分查找大总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/17/%E5%A0%86%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="next" title="堆的大总结">
+      堆的大总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LRU实现"><span class="nav-number">2.</span> <span class="nav-text">LRU实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法一"><span class="nav-number">2.1.</span> <span class="nav-text">方法一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法二"><span class="nav-number">2.2.</span> <span class="nav-text">方法二</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LFU实现"><span class="nav-number">3.</span> <span class="nav-text">LFU实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis的LRU是怎么实现的？"><span class="nav-number">4.</span> <span class="nav-text">Redis的LRU是怎么实现的？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#淘汰流程"><span class="nav-number">4.1.</span> <span class="nav-text">淘汰流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis的LFU是怎么实现的"><span class="nav-number">5.</span> <span class="nav-text">Redis的LFU是怎么实现的?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#巨人的肩膀"><span class="nav-number">6.</span> <span class="nav-text">巨人的肩膀</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">doubleyao</p>
+  <div class="site-description" itemprop="description">就是干</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doubleyao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

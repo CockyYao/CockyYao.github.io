@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="说明数组的重复元素这类题目，有很多类型，在这里做一个总结对比，有备无患。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数组重复元素总结">
+<meta property="og:url" content="http://yoursite.com/2021/01/21/%E6%95%B0%E7%BB%84%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0%E5%A4%A7%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
+<meta property="og:description" content="说明数组的重复元素这类题目，有很多类型，在这里做一个总结对比，有备无患。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-20T17:22:56.290Z">
+<meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="重复元素">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2021/01/21/%E6%95%B0%E7%BB%84%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0%E5%A4%A7%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>数组重复元素总结 | DoubleYao&HebeHo's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">DoubleYao&HebeHo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">进击的姚总</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/01/21/%E6%95%B0%E7%BB%84%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0%E5%A4%A7%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数组重复元素总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-01-21T00:00:00+08:00">2021-01-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-21 01:22:56" itemprop="dateModified" datetime="2021-02-21T01:22:56+08:00">2021-02-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p>数组的重复元素这类题目，有很多类型，在这里做一个总结对比，有备无患。</p>
+<a id="more"></a>
+
+<h3 id="数组中重复的数字-lt-原地置换法-gt"><a href="#数组中重复的数字-lt-原地置换法-gt" class="headerlink" title="数组中重复的数字&lt;原地置换法&gt;"></a>数组中重复的数字&lt;原地置换法&gt;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">找出数组中重复的数字。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">输入：</span><br><span class="line">[2, 3, 1, 0, 2, 5, 3]</span><br><span class="line">输出：2 或 3</span><br></pre></td></tr></table></figure>
+
+<p>分析：这个题目，单纯找出这个数组中重复的数，</p>
+<p>考虑一下，长度为n，所有的数都在 0 ~n-1范围内，所以可以原地进行置换。简单说，一个数x，应该在的位置索引下标应该是x。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public int findRepeatNumber(int[] arr) &#123;</span><br><span class="line">    if (arr &#x3D;&#x3D; null || arr.length &#x3D;&#x3D; 0) &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    for(int i&#x3D;0;i&lt;arr.length;i++)&#123;</span><br><span class="line">        </span><br><span class="line">        &#x2F;&#x2F; 原地置换一下， 下标为i的位置，应该与放的数arr[i]相等</span><br><span class="line">        while(i !&#x3D; arr[i])&#123;</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">            if(arr[arr[i]] &#x3D;&#x3D; arr[i])&#123;</span><br><span class="line">                &#x2F;&#x2F; 说明是第二次放了</span><br><span class="line">                return arr[i];</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                &#x2F;&#x2F; 说明还没放过</span><br><span class="line">                swap(arr, e, i);    </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void swap(int[] arr, int l, int r)&#123;</span><br><span class="line">    int t &#x3D; arr[l];</span><br><span class="line">    arr[l] &#x3D; arr[r];</span><br><span class="line">    arr[r] &#x3D; t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这种做法，其实返回的是重复的数字，如果说要返回第一个重复的数字，那么问题比较复杂了。需要使用o(n)的空间复杂度去做。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public int findRepeatNumber(int[] arr) &#123;</span><br><span class="line">    if (arr &#x3D;&#x3D; null || arr.length &#x3D;&#x3D; 0) &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 标记数组</span><br><span class="line">    boolean[] f &#x3D; new boolean[arr.length];</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 因为</span><br><span class="line">    for(int i&#x3D;0;i&lt;arr.length;i++)&#123;</span><br><span class="line">        if(f[arr[i]] &#x3D;&#x3D; true)&#123;</span><br><span class="line">            return arr[i];</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        f[arr[i]] &#x3D; true;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>长度为n，所有的数都在 0 ~n-1范围内。所以不重复情况下，应当是：0,1,2,3…n-1。但是实际是存在一些重复的数字。直接拿数字当做下标，去填标记数组，如果标记数组被重复标记，说明，是重复元素。</p>
+<h3 id="剑指offer-数组重复数字"><a href="#剑指offer-数组重复数字" class="headerlink" title="剑指offer-数组重复数字"></a>剑指offer-数组重复数字</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">在一个长度为n的数组里的所有数字都在0到n-1的范围内。 </span><br><span class="line"></span><br><span class="line">数组中某些数字是重复的，但不知道有几个数字是重复的。</span><br><span class="line"></span><br><span class="line">也不知道每个数字重复几次。请找出数组中第一个重复的数字。 </span><br><span class="line"></span><br><span class="line">例如，如果输入长度为7的数组&#123;2,3,1,0,2,5,3&#125;，那么对应的输出是第一个重复的数字2。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">返回描述：</span><br><span class="line">如果数组中有重复的数字，函数返回true，否则返回false。</span><br><span class="line">如果数组中有重复的数字，把重复的数字放到参数duplication[0]中。（ps:duplication已经初始化，可以直接赋值使用。）</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public boolean duplicate(int numbers[],int length,int [] duplication) &#123;</span><br><span class="line"> </span><br><span class="line">      boolean[] k &#x3D; new boolean[length];</span><br><span class="line">        for (int i &#x3D; 0; i &lt; k.length; i++) &#123;</span><br><span class="line">            if (k[numbers[i]] &#x3D;&#x3D; true) &#123;</span><br><span class="line">                duplication[0] &#x3D; numbers[i];</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            k[numbers[i]] &#x3D; true;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="数组中出现次数超过一半的数字-lt-摩尔投票-gt"><a href="#数组中出现次数超过一半的数字-lt-摩尔投票-gt" class="headerlink" title="数组中出现次数超过一半的数字&lt;摩尔投票&gt;"></a>数组中出现次数超过一半的数字&lt;摩尔投票&gt;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">你可以假设数组是非空的，并且给定的数组总是存在多数元素。</span><br><span class="line"></span><br><span class="line">输入: [1, 2, 3, 2, 2, 2, 5, 4, 2]</span><br><span class="line">输出: 2</span><br></pre></td></tr></table></figure>
+
+<p>最骚的解法: 排序取中值</p>
+<p>第一种方法：使用hashmap，遍历一次，返回结果，时间复杂度o(n)，空间复杂度o(n)</p>
+<p>第二种解法：<a href="https://cloud.tencent.com/developer/article/1600607" target="_blank" rel="noopener">摩尔投票法</a>，时间复杂度o(n)，空间复杂度o(1)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public int major(int[] nums)&#123;</span><br><span class="line">    </span><br><span class="line">    if(nums &#x3D;&#x3D; null || nums.length &#x3D;&#x3D; 0)&#123;</span><br><span class="line">        return -1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 所求的数字</span><br><span class="line">    int major &#x3D; nums[0];</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 计数器</span><br><span class="line">    int count &#x3D; 1;</span><br><span class="line">    </span><br><span class="line">    for(int i&#x3D;1; i&lt;nums.length; i++)&#123;</span><br><span class="line">    </span><br><span class="line">        </span><br><span class="line">        if(nums[i] &#x3D;&#x3D; major)&#123;</span><br><span class="line">            &#x2F;&#x2F; 两者相等，计数器+1</span><br><span class="line">            count ++;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            &#x2F;&#x2F; 两者不等</span><br><span class="line">            if(count &#x3D;&#x3D; 0)&#123;</span><br><span class="line">                &#x2F;&#x2F; 已经全部抵消完了</span><br><span class="line">                major &#x3D; nums[i];</span><br><span class="line">                count++;</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                &#x2F;&#x2F; 抵消一个</span><br><span class="line">                count--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return major;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="只出现一次的数字-1个-lt-单纯异或-gt"><a href="#只出现一次的数字-1个-lt-单纯异或-gt" class="headerlink" title="只出现一次的数字(1个)&lt;单纯异或&gt;"></a>只出现一次的数字(1个)&lt;单纯异或&gt;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。</span><br><span class="line"></span><br><span class="line">输入: [2,2,1]</span><br><span class="line">输出: 1</span><br><span class="line"></span><br><span class="line">输入: [4,1,2,1,2]</span><br><span class="line">输出: 4</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public int singleNumber(int[] nums) &#123;</span><br><span class="line">    int res &#x3D; 0;</span><br><span class="line">    for(int i&#x3D;0;i&lt;nums.length;i++)&#123;</span><br><span class="line">        res &#x3D; res ^ nums[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="只出现一次的数字-2个-lt-异或-分组-gt"><a href="#只出现一次的数字-2个-lt-异或-分组-gt" class="headerlink" title="只出现一次的数字(2个)&lt;异或,分组&gt;"></a>只出现一次的数字(2个)&lt;异或,分组&gt;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">一个整型数组 nums 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。</span><br><span class="line"></span><br><span class="line">输入：nums &#x3D; [4,1,4,6]</span><br><span class="line">输出：[1,6] 或 [6,1]</span><br><span class="line"></span><br><span class="line">输入：nums &#x3D; [1,2,10,4,1,4,3,3]</span><br><span class="line">输出：[2,10] 或 [10,2]</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public int[] singleNumbers(int[] nums) &#123;</span><br><span class="line">       </span><br><span class="line">       int rs &#x3D; 0;</span><br><span class="line">       </span><br><span class="line">       for(int e : nums)&#123;</span><br><span class="line">           rs ^&#x3D; e;</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       &#x2F;&#x2F; 存放结果</span><br><span class="line">       int[] res &#x3D; new int[2];</span><br><span class="line">       </span><br><span class="line">       &#x2F;&#x2F; rs为所求两个数异或的值</span><br><span class="line">       &#x2F;&#x2F; 记住rs &amp; (-rs) 就是拿到位运算，</span><br><span class="line">       &#x2F;&#x2F; 从右到左 第一个1的值</span><br><span class="line">       int group &#x3D; rs &amp; (-rs);</span><br><span class="line">       </span><br><span class="line">       &#x2F;&#x2F; 这个group 就是这个值</span><br><span class="line">       </span><br><span class="line">       &#x2F;&#x2F; 接下来，nums内部的数，进行分组，这个位为1的一组，这个位为0的一组。</span><br><span class="line">       </span><br><span class="line">       &#x2F;&#x2F; 这样就把两个数分开了，接下来就ok了</span><br><span class="line">       for(int x:nums)&#123;</span><br><span class="line">           if((x&amp;group) &#x3D;&#x3D; 0)&#123;</span><br><span class="line">               &#x2F;&#x2F; 这个位为0的在一组</span><br><span class="line">               res[0] ^&#x3D; x;</span><br><span class="line">           &#125;else&#123;</span><br><span class="line">               &#x2F;&#x2F; 这个位为1的在一组</span><br><span class="line">               res[1] ^&#x3D; x;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       return res;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键点：</p>
+<p>rs &amp; (-rs) 这个操作，就是找到从右到左扫描，第一个1的位置，从而确定这个数。</p>
+<p>通过与这个数的这个位置，是0，或者是1，进行分组，从而将这个数组的元素划分成两部分，然后得到结果。</p>
+<h3 id="只出现一次的数字-其他都出现三次"><a href="#只出现一次的数字-其他都出现三次" class="headerlink" title="只出现一次的数字(其他都出现三次)"></a>只出现一次的数字(其他都出现三次)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">在一个数组 nums 中除一个数字只出现一次之外，其他数字都出现了三次。请找出那个只出现一次的数字。</span><br><span class="line"></span><br><span class="line">输入：nums &#x3D; [3,4,3,3]</span><br><span class="line">输出：4</span><br></pre></td></tr></table></figure>
+
+
+<p>第一种解法：使用hashMap去做，这个还是比较好理解的。</p>
+<p><a href="https://zhuanlan.zhihu.com/p/349783015" target="_blank" rel="noopener">第二种解法</a>：针对每个数的每个位，去计数，然后针对每个位的1的个数，求和。接着就开始对3取余数，最后得到这个数的结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">public int singleNumber(int[] nums) &#123;</span><br><span class="line">    int[] bit &#x3D; new int[32];</span><br><span class="line">    for(int val : nums)&#123;</span><br><span class="line">        f1(val, bit);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return f2(bit);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 统计每一个数的位数</span><br><span class="line">private static void f1(int n, int[] bit) &#123;</span><br><span class="line">    char[] arrs &#x3D; Integer.toBinaryString(n).toCharArray();</span><br><span class="line">    if (arrs &#x3D;&#x3D; null || arrs.length &#x3D;&#x3D; 0) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 注意高低位哦</span><br><span class="line">    int j &#x3D; 0;</span><br><span class="line">    for (int i &#x3D; arrs.length - 1; i &gt;&#x3D; 0; i--, j++) &#123;</span><br><span class="line">        char ch &#x3D; arrs[i];</span><br><span class="line">        if(ch &#x3D;&#x3D; &#39;1&#39;)&#123;</span><br><span class="line">            bit[j] ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 然后取余数</span><br><span class="line">private static int f2(int[] bit) &#123;</span><br><span class="line">    int[] res &#x3D; new int[32];</span><br><span class="line">    int s &#x3D; 0;</span><br><span class="line">    for (int i &#x3D; 0; i &lt; bit.length; i++) &#123;</span><br><span class="line">        res[i] &#x3D; bit[i] % 3;</span><br><span class="line">        if(res[i] &gt; 0)&#123;</span><br><span class="line">            s &#x3D; s + (int)Math.pow(2,i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0/" rel="tag"># 重复元素</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/21/%E9%93%BE%E8%A1%A8%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="prev" title="链表大总结">
+      <i class="fa fa-chevron-left"></i> 链表大总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/21/%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="next" title="排序总结系列">
+      排序总结系列 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#说明"><span class="nav-number">1.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数组中重复的数字-lt-原地置换法-gt"><span class="nav-number">2.</span> <span class="nav-text">数组中重复的数字&lt;原地置换法&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#剑指offer-数组重复数字"><span class="nav-number">3.</span> <span class="nav-text">剑指offer-数组重复数字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数组中出现次数超过一半的数字-lt-摩尔投票-gt"><span class="nav-number">4.</span> <span class="nav-text">数组中出现次数超过一半的数字&lt;摩尔投票&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只出现一次的数字-1个-lt-单纯异或-gt"><span class="nav-number">5.</span> <span class="nav-text">只出现一次的数字(1个)&lt;单纯异或&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只出现一次的数字-2个-lt-异或-分组-gt"><span class="nav-number">6.</span> <span class="nav-text">只出现一次的数字(2个)&lt;异或,分组&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只出现一次的数字-其他都出现三次"><span class="nav-number">7.</span> <span class="nav-text">只出现一次的数字(其他都出现三次)</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">doubleyao</p>
+  <div class="site-description" itemprop="description">就是干</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doubleyao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

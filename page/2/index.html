@@ -183,6 +183,336 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/19/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/19/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">分库分表的总结</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-19 16:50:45" itemprop="dateCreated datePublished" datetime="2020-11-19T16:50:45+08:00">2020-11-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<p>title: 分库分表的思考<br>date: 2020-8-10<br>categories: Java<br>tags: MySQL</p>
+<hr>
+<p>关系型数据库本身易容易成为系统的瓶颈，单机的存储、连接数量、处理能力等，随着业务的不断增长，数据量爆炸，单表500万行或者超过20G，便存在查询性能的瓶颈。</p>
+<h3 id="什么是分库分表"><a href="#什么是分库分表" class="headerlink" title="什么是分库分表"></a>什么是分库分表</h3><h4 id="切分方式"><a href="#切分方式" class="headerlink" title="切分方式"></a>切分方式</h4><ul>
+<li><p>水平切分</p>
+<ul>
+<li>水平切表</li>
+</ul>
+</li>
+</ul>
+<p>就是把一个表的数据，分隔到多个库的多个表中。</p>
+<h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><p>不存在单库数据量过大、高并发的性能瓶颈、提升了系统稳定性和负载能力</p>
+<p>应用端改造较小，不需要拆分业务模块</p>
+<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><ul>
+<li><p>跨分片的事务一致性难以保证</p>
+</li>
+<li><p>跨库的join关联查询性能较差</p>
+</li>
+<li><p>数据库多次扩展难度和维护量级大</p>
+</li>
+<li><p>垂直切分</p>
+<ul>
+<li><p>垂直切库</p>
+<p>  根据业务耦合性，将不同的表数据存储在不通的数据库。&lt;类似大系统拆分成小系统&gt;。</p>
+</li>
+<li><p>垂直切表</p>
+<p>  将一个有很多字段的表给拆分成多个表上去。降低数据页大小，效率更高。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h4><p>垂直切分一定程度提升IO、数据库连接数、单机硬件资源的瓶颈。</p>
+<h4 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h4><p>部分表无法join,只能通过接口聚合方式解决，提升了开发的复杂度。</p>
+<p>分布式事务处理复杂</p>
+<p>依然存在单表数据量过大的问题</p>
+<h3 id="数据分片的规则有哪些？"><a href="#数据分片的规则有哪些？" class="headerlink" title="数据分片的规则有哪些？"></a>数据分片的规则有哪些？</h3><ul>
+<li>查询分片</li>
+</ul>
+<p>将分片路由策略记录在单独的一个库中，每次查询数据库时，先到mapping db查询路由</p>
+<ul>
+<li>范围切分</li>
+</ul>
+<p>按照id的范围（时间的范围）进行切分</p>
+<p>有点冷热数据分离的感觉</p>
+<p>这个比较便于扩展，支持范围查询，单表大小可控，但是热点数据可能成为性能的瓶颈。</p>
+<ul>
+<li><p>Hash切分</p>
+<p>  数据分片比较均匀，集群扩容比较好地避免了这个问题，容易面临跨分片查询的问题。</p>
+</li>
+</ul>
+<h4 id="事务的问题如何解决？"><a href="#事务的问题如何解决？" class="headerlink" title="事务的问题如何解决？"></a>事务的问题如何解决？</h4><h4 id="跨节点join的问题？"><a href="#跨节点join的问题？" class="headerlink" title="跨节点join的问题？"></a>跨节点join的问题？</h4><p>全局表策略</p>
+<p>字段冗余策略</p>
+<p>数据组装</p>
+<p>ER分片</p>
+<h4 id="主键的id问题？"><a href="#主键的id问题？" class="headerlink" title="主键的id问题？"></a>主键的id问题？</h4><p>一旦数据库被划分到多个物理节点上，不能依赖数据库自身的主键生成机制。</p>
+<ul>
+<li>需要思考全局id唯一的策略</li>
+<li>应用程序在插入数据前先获得id，以便进行SQL路由</li>
+</ul>
+<ol>
+<li>UUID</li>
+</ol>
+<p>uuid标准形式：32个16进制数字，比较占内存，并且建立索引和基于索引查询会存在性能问题。</p>
+<ol start="2">
+<li>结合数据库维护sequence表</li>
+</ol>
+<p>创建一张表，</p>
+<p>每次需要为某个表的新纪录生成id就从数据库中取出id。</p>
+<p>任何插入操作都会访问该表，<br>该表容易成为性能的瓶颈。</p>
+<p>并且存在单点问题，一旦数据库表失效，整个程序将无法工作。</p>
+<ol start="3">
+<li>snowflake分布式自增ID算法</li>
+</ol>
+<p>生成64位Long型数字，</p>
+<p>1(不使用)+41(41bit-时间戳)+10(工作机器id)+12(序列号)</p>
+<p>强依赖机器时钟，时钟回拨，可能导致生成的ID重复。</p>
+<h4 id="跨分页的排序分页"><a href="#跨分页的排序分页" class="headerlink" title="跨分页的排序分页"></a>跨分页的排序分页</h4><h4 id="原则"><a href="#原则" class="headerlink" title="原则"></a>原则</h4><ul>
+<li><p>能不切分尽量不要切分</p>
+<p>  并不是所有的表都要切分，关注表的数据增长速度。</p>
+<p>  不要过度设计、过度优化</p>
+<p>  先做力所能及的事情，升级硬件、升级IO、索引优化等等。</p>
+</li>
+</ul>
+<h3 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀:"></a>巨人的肩膀:</h3><p><a href="https://tech.meituan.com/2016/11/18/dianping-order-db-sharding.html" target="_blank" rel="noopener">https://tech.meituan.com/2016/11/18/dianping-order-db-sharding.html</a></p>
+<p><a href="https://juejin.im/entry/6844903648670007310" target="_blank" rel="noopener">https://juejin.im/entry/6844903648670007310</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/88896222" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/88896222</a></p>
+<p><a href="https://tech.meituan.com/2016/11/18/dianping-order-db-sharding.html" target="_blank" rel="noopener">https://tech.meituan.com/2016/11/18/dianping-order-db-sharding.html</a></p>
+<p><a href="https://www.javazhiyin.com/59820.html" target="_blank" rel="noopener">https://www.javazhiyin.com/59820.html</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/19/%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A8%E8%AE%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/19/%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E8%AE%A8%E8%AE%BA/" class="post-title-link" itemprop="url">缓存一致性讨论</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-19 10:39:45" itemprop="dateCreated datePublished" datetime="2020-11-19T10:39:45+08:00">2020-11-19</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="缓存更新策略分析"><a href="#缓存更新策略分析" class="headerlink" title="缓存更新策略分析"></a>缓存更新策略分析</h3><p>从理论上说，需要给缓存设置过期时间，是保证最终一致性的解决方案。因为有些系统是需要保证性能，可以容忍短时间的缓存与数据库的不一致。</p>
+<p>其实，当缓存设置了过期的时间，那么数据库写成功，缓存更新失败，只要到达过期的时间，后面的读请求会自然将缓存加入到新值中去。</p>
+<h4 id="先更新数据库，再更新缓存"><a href="#先更新数据库，再更新缓存" class="headerlink" title="先更新数据库，再更新缓存"></a>先更新数据库，再更新缓存</h4><p>这个策略是不行的。</p>
+<p>从业务角度讲：</p>
+<ol>
+<li><p>如果缓存是经过一系列计算得到的，那么每次更新缓存前进行大量计算，无疑浪费性能。</p>
+</li>
+<li><p>如果业务场景是写多读少，那么缓存总是被更新，也是比较浪费性能的。</p>
+</li>
+</ol>
+<p>从线程安全角度讲：</p>
+<p>假设两个线程A,B</p>
+<p>A update DB<br>B update DB<br>B update cache<br>A update cache</p>
+<p>这种情况就会产生脏数据。</p>
+<h4 id="先删除缓存，在更新数据库"><a href="#先删除缓存，在更新数据库" class="headerlink" title="先删除缓存，在更新数据库"></a>先删除缓存，在更新数据库</h4><p>这种情况会产生不一致的情况，</p>
+<p>比如两个线程A,B</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">A delete cache</span><br><span class="line">B read cache is not exist</span><br><span class="line">B read DB</span><br><span class="line">B write DB value into cache</span><br><span class="line">A update DB</span><br></pre></td></tr></table></figure>
+
+
+<p>这样就会产生不一致的情况，如果没有设置缓存的过期时间，就会一直产生不一致的情况。</p>
+<p>这里提供一种策略：</p>
+<p><strong>延时双删</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">delete cache </span><br><span class="line">update db</span><br><span class="line">sleep(100)</span><br><span class="line">delete cache</span><br></pre></td></tr></table></figure>
+
+<p><strong>MySQL主从不同步怎么办？</strong></p>
+<p>加大sleep的时间</p>
+<p><strong>睡太久吞吐量是不是不行</strong></p>
+<p>异步删除，这样可以提高吞吐量</p>
+<p><strong>第二次删除失败了怎么办？</strong></p>
+<p>？？？</p>
+<h3 id="先更新数据库，在删除缓存"><a href="#先更新数据库，在删除缓存" class="headerlink" title="先更新数据库，在删除缓存"></a>先更新数据库，在删除缓存</h3><p><strong>会不会存在并发问题？？</strong></p>
+<p>可能存在的。</p>
+<p>存在的前提条件是：写数据库的时间短于读数据库的时间。</p>
+<p>举个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">缓存失效</span><br><span class="line">A线程读数据库</span><br><span class="line">B线程更新数据库</span><br><span class="line">B线程删除了缓存</span><br><span class="line">A线程把旧值放到缓存</span><br></pre></td></tr></table></figure>
+
+<p><strong>应该怎么解决？</strong></p>
+<p>异步延迟删除操作</p>
+<h3 id="删除缓存失败了怎么办？"><a href="#删除缓存失败了怎么办？" class="headerlink" title="删除缓存失败了怎么办？"></a>删除缓存失败了怎么办？</h3><ul>
+<li>方案一</li>
+</ul>
+<p>重试机制，将需要删除的key推消息队列，然后自行消费，重试删除缓存。</p>
+<ul>
+<li>方案二</li>
+</ul>
+<p>订阅bin log信息，提取出key，然后删除，如果失败了，再推送消息队列，进行重试。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/10/kafka%E4%BA%8B%E5%8A%A1%E4%BF%9D%E8%AF%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/10/kafka%E4%BA%8B%E5%8A%A1%E4%BF%9D%E8%AF%81/" class="post-title-link" itemprop="url">分布式事务之事务消息</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-10 00:00:00 / 修改时间：17:27:16" itemprop="dateCreated datePublished" datetime="2020-11-10T00:00:00+08:00">2020-11-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>实际业务场景我们会遇到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">做一些业务操作;</span><br><span class="line"></span><br><span class="line">调用http请求更新第三方子系统状态;</span><br><span class="line"></span><br><span class="line">记录最后的操作信息;</span><br></pre></td></tr></table></figure>
+
+<p>直接的http调用或rpc调用是不可靠的，可能会存在网络问题、单点故障等。</p>
+<p>如何保证上述操作的事务性质？？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/10/kafka%E4%BA%8B%E5%8A%A1%E4%BF%9D%E8%AF%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/05/kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -764,262 +1094,11 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">关于ThreadLocal的思考</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-21T00:00:00+08:00">2020-02-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-22 10:55:58" itemprop="dateModified" datetime="2020-05-22T10:55:58+08:00">2020-05-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95/" itemprop="url" rel="index">
-                    <span itemprop="name">技术发展</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>简单说，ThreadLocal，即为线程本地变量，每一个线程拥有自己的变量副本，互相都不干扰，线程安全。</p>
-<h4 id="如何使用？"><a href="#如何使用？" class="headerlink" title="如何使用？"></a>如何使用？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private static ThreadLocal&lt;String&gt; idThreadLocal &#x3D; new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">public static void setId(String id) &#123;</span><br><span class="line">    if(StringUtils.isBlank(id))&#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    MDC.put(&quot;id&quot;, id);</span><br><span class="line">    idThreadLocal.set(id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static String getId() &#123;</span><br><span class="line">    return idThreadLocal.get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public static void clear() &#123;</span><br><span class="line">    idThreadLocal.remove();;</span><br><span class="line">    MDC.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/21/ThreadLocal%E7%9A%84%E7%BB%88%E6%9E%81%E6%80%BB%E7%BB%93/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/27/JVM%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%86%E9%85%8D/" class="post-title-link" itemprop="url">Java内存区域详解</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-01-27 00:00:00" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-04 19:33:16" itemprop="dateModified" datetime="2020-11-04T19:33:16+08:00">2020-11-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/JVM%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">JVM技术</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="Java虚拟机是如何使用内存的？"><a href="#Java虚拟机是如何使用内存的？" class="headerlink" title="Java虚拟机是如何使用内存的？"></a>Java虚拟机是如何使用内存的？</h3><ol>
-<li>内存空间的分配？以及每块区域都是干嘛的，哪些是线程隔离的？</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">Java虚拟机在执行一个Java应用的时候，会将管理内存进行划分：</span><br><span class="line"></span><br><span class="line">---------各个线程共享区域-------------</span><br><span class="line"></span><br><span class="line">方法区：</span><br><span class="line">    </span><br><span class="line">    方法区是JVM的规范&lt;永久代是hotspot的一种实现&gt;，</span><br><span class="line">    </span><br><span class="line">    这里存放着</span><br><span class="line">    </span><br><span class="line">    已经被虚拟机加载的类型信息、静态变量、</span><br><span class="line">    </span><br><span class="line">    即时编译器编译后的代码缓存数据。</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">堆区：</span><br><span class="line"></span><br><span class="line">    存放对象实例，</span><br><span class="line">    </span><br><span class="line">    几乎所有的对象都在这里分配内存，</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    如果开启了逃逸分析，对象也可能在栈上分配。</span><br><span class="line">    </span><br><span class="line">    jdk1.7之前字符串常量池存放在方法区，jdk1.7,1.8之后字符串常量存放在堆中了</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">---------各线程隔离区域-------------</span><br><span class="line"></span><br><span class="line">虚拟机栈：</span><br><span class="line"></span><br><span class="line">描述的是Java方法执行的线程内存模型：</span><br><span class="line"></span><br><span class="line">保存方法的局部变量表、操作数栈、动态链接、方法出口等信息</span><br><span class="line"></span><br><span class="line">本地方法栈：</span><br><span class="line"></span><br><span class="line">    与虚拟机栈发挥的作用类似</span><br><span class="line"></span><br><span class="line">程序计数器：</span><br><span class="line">    </span><br><span class="line">    当前线程执行的字节码行号指示器，分支、循环、跳转等都从这里过</span><br></pre></td></tr></table></figure>
-
-
-<ol start="2">
-<li>在空间上，jdk1.8 与 1.7的区别</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在空间上，jdk1.7 hotspot虚拟机针对方法区，实现了永久代，</span><br><span class="line"></span><br><span class="line">它是堆区的一部分。jdk1.8之后就把永久代去除了，</span><br><span class="line"></span><br><span class="line">用了**元空间**来替换**永久代**。</span><br></pre></td></tr></table></figure>
-
-
-<p>参考链接：</p>
-<p><a href="https://www.cnblogs.com/jjfan0327/p/12778954.html" target="_blank" rel="noopener">https://www.cnblogs.com/jjfan0327/p/12778954.html</a></p>
-<p><a href="https://juejin.im/entry/6844903858003509255" target="_blank" rel="noopener">https://juejin.im/entry/6844903858003509255</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/27/index/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/27/index/" class="post-title-link" itemprop="url">写在2020年的春节</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-01-27 00:00:00 / 修改时间：07:11:11" itemprop="dateCreated datePublished" datetime="2020-01-27T00:00:00+08:00">2020-01-27</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E7%94%9F%E6%B4%BB/" itemprop="url" rel="index">
-                    <span itemprop="name">个人生活</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>我是来自杭州的Java程序员，目前在猪厂工作。本站是我平时写的一些博客文章，主要关注Java领域相关技术，希望来到这里的读者能找到些有点用的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/01/27/index/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1085,7 +1164,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1098,7 +1177,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

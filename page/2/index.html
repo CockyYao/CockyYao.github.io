@@ -183,6 +183,199 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/30/kafka%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/30/kafka%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/" class="post-title-link" itemprop="url">kafka事务消息</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-30 14:21:50 / 修改时间：14:21:51" itemprop="dateCreated datePublished" datetime="2020-11-30T14:21:50+08:00">2020-11-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<p>title: Kafka之事务性实现<br>date: 2020-10-12<br>categories: Java<br>tags: 事务</p>
+<hr>
+<p>Apache Kafka在Exactly-Once Semantics（EOS）上声明了三种粒度的语义保证：</p>
+<ol>
+<li>idempotent producer: 单个会话的producer的生产性幂等</li>
+<li>transactions: 多会话、多分区的事务保证</li>
+<li>跨读写过程任务的一次精确处理</li>
+</ol>
+<h3 id="Kafka-事务"><a href="#Kafka-事务" class="headerlink" title="Kafka 事务"></a>Kafka 事务</h3><ul>
+<li>事务id机制</li>
+</ul>
+<p>全局transactionId, 即txn.id，由用户提供，故障恢复后也不改变</p>
+<ul>
+<li>多会话/多topic/partition事务是怎么做的？</li>
+</ul>
+<ul>
+<li>事务协调器如何保证高可用的，挂了咋办</li>
+</ul>
+<p>关于数据的强容错性、一致性、存储的容错性方案，采用多副本机制，保证高可用。</p>
+<p>min.isr + ack 机制？？？</p>
+<ul>
+<li>事务协调器挂了事务的状态怎么恢复的？<br>（事务状态如何保证容错性、一致性）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">所有的事务状态信息</span><br><span class="line"></span><br><span class="line">均持久化到__transaction_state，</span><br><span class="line"></span><br><span class="line">这个内部topic中，</span><br><span class="line"></span><br><span class="line">所有的事务状态都会持久化到这个topic</span><br><span class="line"></span><br><span class="line">故障恢复后也是从这个topic中恢复数据。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>producer重启之后，重新abort事务，是怎么实现的？</li>
+</ul>
+<p>由于每次重启之后，producer id会被重新生成，所以引入transaction id来解决producer重启之后的事务问题。</p>
+<h3 id="几个概念"><a href="#几个概念" class="headerlink" title="几个概念"></a>几个概念</h3><h4 id="TransactionCoordinator"><a href="#TransactionCoordinator" class="headerlink" title="TransactionCoordinator"></a>TransactionCoordinator</h4><ul>
+<li>处理相关的请求</li>
+<li>维护事务的状态信息</li>
+<li>向其他的broker发送transaction marker数据</li>
+</ul>
+<h4 id="Transaction-Log"><a href="#Transaction-Log" class="headerlink" title="Transaction Log"></a>Transaction Log</h4><p>事务的状态日志信息持久化到内部topic上，__transaction_state。该topic默认有50个partition，transactionId的hash值与分区总数进行hash,得到事务对应的处理分区。</p>
+<p><strong>tranaction_state与</strong>consumer_offsets一样，是compact类型的topic，换句话说，要求每条消息记录都有key，kafka会针对这个key进行去重合并。</p>
+<h4 id="Transaction-Marker"><a href="#Transaction-Marker" class="headerlink" title="Transaction Marker"></a>Transaction Marker</h4><p>当producer完成事务了，进行commit/abort时，需要先告诉事务协调器，再由事务协调器再发送control messages 至各个topic-partition的leader。</p>
+<p>也叫control messages，由事务协调器发送出去，用来告诉这个事务涉及到的topic-partition集合的leaders，当前事务操作已经完成了，可以执行commit或者abort操作了。</p>
+<p>为啥要当中绕一层呢？而不是直接由生产者去通知到partition的leader呢？</p>
+<p>性能考虑</p>
+<h4 id="Server-端事务状态管理"><a href="#Server-端事务状态管理" class="headerlink" title="Server 端事务状态管理"></a>Server 端事务状态管理</h4><h4 id="Client-端-事务状态管理"><a href="#Client-端-事务状态管理" class="headerlink" title="Client 端 事务状态管理"></a>Client 端 事务状态管理</h4><h3 id="整体的事务状态流程"><a href="#整体的事务状态流程" class="headerlink" title="整体的事务状态流程"></a>整体的事务状态流程</h3><h4 id="一-查找事务协调器"><a href="#一-查找事务协调器" class="headerlink" title="一. 查找事务协调器"></a>一. 查找事务协调器</h4><p>通过事务id的hash值与__transaction_state的partition数量进行取余，确定分区后，然后该分区的leader就是相应的事务协调器</p>
+<h4 id="二-获取PID"><a href="#二-获取PID" class="headerlink" title="二. 获取PID"></a>二. 获取PID</h4><p>请求获取pid，有了pid可以保证事务写入的幂等性。</p>
+<p>根据txn.id 进行pid分配，</p>
+<p>如果是一个新的事务id, 那么重新进行一个pid的分配，</p>
+<p>如果不是新的事务id，那么就获取原有的事务状态信息。</p>
+<h4 id="三-开始事务"><a href="#三-开始事务" class="headerlink" title="三. 开始事务"></a>三. 开始事务</h4><p>本地开始一个事务，注意server端的事务状态转移，与client端的事务状态转移。</p>
+<h4 id="四-执行生产消费处理"><a href="#四-执行生产消费处理" class="headerlink" title="四. 执行生产消费处理"></a>四. 执行生产消费处理</h4><p>比如消费kafka的消息，然后处理一下，完成之后，重新写入到kafka</p>
+<h4 id="五-然后提交或者中止事务"><a href="#五-然后提交或者中止事务" class="headerlink" title="五. 然后提交或者中止事务"></a>五. 然后提交或者中止事务</h4><p>无论是commit/abort事务，对于producer而言，都是向事务协调器发送EndTxnRequest请求，</p>
+<p>协调器收到了EndTxnRequest请求之后，会更新事务的元数据信息，然后向该事务涉及到的topic-partition的leader发送control message</p>
+<p>最后将这些事务的状态更新为COMMIT或ABORT，并将事务的meta信息持久化到事务日志中。</p>
+<h3 id="几个问题"><a href="#几个问题" class="headerlink" title="几个问题"></a>几个问题</h3><ul>
+<li>一个txn.id，会不会有多个producer持有？</li>
+</ul>
+<p>不会，如果多个 Producer 共用一个 txn.id，那么最后启动的 Producer 会成功运行，会它之前启动的 Producer 都 Fencing 掉</p>
+<ul>
+<li>txn.id长期不使用，server端怎么处理?</li>
+</ul>
+<p>具有事务操作的超时机制，缓存txn.id的相关信息，超过一定的时间期限，将被设置为过期。</p>
+<h3 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀"></a>巨人的肩膀</h3><p><a href="http://matt33.com/2018/11/04/kafka-transaction/" target="_blank" rel="noopener">http://matt33.com/2018/11/04/kafka-transaction/</a></p>
+<p><a href="http://www.heartthinkdo.com/?p=2040" target="_blank" rel="noopener">http://www.heartthinkdo.com/?p=2040</a></p>
+<p><a href="http://www.jasongj.com/kafka/transaction/" target="_blank" rel="noopener">http://www.jasongj.com/kafka/transaction/</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/23/guava%E7%BC%93%E5%AD%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/23/guava%E7%BC%93%E5%AD%98/" class="post-title-link" itemprop="url">guava缓存</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-23 16:11:33" itemprop="dateCreated datePublished" datetime="2020-11-23T16:11:33+08:00">2020-11-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<p>title: 揭开Guava缓存的面纱<br>date: 2020-08-05<br>categories: Java<br>tags: Guava cache</p>
+<hr>
+<h4 id="为什么要用Guava-Cache"><a href="#为什么要用Guava-Cache" class="headerlink" title="为什么要用Guava Cache"></a>为什么要用Guava Cache</h4><ul>
+<li>愿意牺牲一些内存来提高访问速度</li>
+<li>预判到某些变量不是经常变化的，并且这些变量是经常会被访问到的</li>
+<li>缓存的数据总量不会超出内存总量</li>
+</ul>
+<p>轻量级缓存，内部封装了一系列缓存管理的方式，如缓存的回收、加载等等。使用方便。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/23/guava%E7%BC%93%E5%AD%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/19/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -749,93 +942,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/" class="post-title-link" itemprop="url">一次借鉴鹰眼的实践</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-09-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-21T00:00:00+08:00">2020-09-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-04 23:34:56" itemprop="dateModified" datetime="2020-11-04T23:34:56+08:00">2020-11-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>百万级微服务互相调用，出了问题谁负责？</p>
-<p>打日志，谁接口有问题找谁？</p>
-<p>我咋知道谁接口有问题？</p>
-<p>如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">埋点+无缝透传</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/21/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9B%B8%E5%85%B3%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -919,7 +1025,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/22/RocketMq%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%AE%9E%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -933,7 +1039,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2020/08/22/RocketMq%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">RocketMq事务消息</a>
+            <a href="/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/" class="post-title-link" itemprop="url">一次借鉴鹰眼的实践</a>
         </h1>
 
         <div class="post-meta">
@@ -943,14 +1049,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-08-22 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-22T00:00:00+08:00">2020-08-22</time>
+              <time title="创建时间：2020-09-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-21T00:00:00+08:00">2020-09-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-23 16:12:47" itemprop="dateModified" datetime="2020-11-23T16:12:47+08:00">2020-11-23</time>
+                <time title="修改时间：2020-11-04 23:34:56" itemprop="dateModified" datetime="2020-11-04T23:34:56+08:00">2020-11-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -975,106 +1081,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>官方文档说明：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;rocketmq.apache.org&#x2F;rocketmq&#x2F;the-design-of-transactional-message&#x2F;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>half message</li>
-</ul>
-<p>指的是暂不能投递的消息，发送方已经将消息成功发送到了MQ服务端，但是服务端未收到生产者对于该消息的二次确认，这种情况称为半消息。</p>
-<ul>
-<li>消息回查</li>
-</ul>
-<p>由于网络闪断、生产者应用重启等原因，导致某条事务消息的二次确认丢失，MQ服务端会主动向生产者发起询问，消息回查本地事务的执行状态。</p>
-<h3 id="执行流程图"><a href="#执行流程图" class="headerlink" title="执行流程图"></a>执行流程图</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. 生产者向mq发送半消息</span><br><span class="line">2. mq server将消息持久化之后，返回ack确认消息发送成功。</span><br><span class="line">3. 发送方开始执行本地事务逻辑。</span><br><span class="line">4. 发送方根据本地事务执行结果，提交mq server二次确认，</span><br><span class="line">5. 如果mq长期未收到二次确认的消息，则会发起消息回查。</span><br><span class="line">6. 消息回查，确定对应的消息本地事务执行的最终结果。</span><br><span class="line">7. 发送方根据检查的得到的本地事务状态再次提交确认。</span><br></pre></td></tr></table></figure>
-
-<h3 id="事务消息实际是怎么实现的"><a href="#事务消息实际是怎么实现的" class="headerlink" title="事务消息实际是怎么实现的"></a>事务消息实际是怎么实现的</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本质是发送half message时，将topic的内容继续修改成了RMQ_SYS_TRANS_HALF_TOPIC，这一类topic对所有的consumer是不可见的。</span><br></pre></td></tr></table></figure>
-
-<h3 id="如果消费侧失败了怎么办？"><a href="#如果消费侧失败了怎么办？" class="headerlink" title="如果消费侧失败了怎么办？"></a>如果消费侧失败了怎么办？</h3><h3 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀"></a>巨人的肩膀</h3><p><a href="https://juejin.cn/post/6844903648502218765" target="_blank" rel="noopener">https://juejin.cn/post/6844903648502218765</a><br><a href="https://www.cnblogs.com/starcrm/p/13064842.html" target="_blank" rel="noopener">https://www.cnblogs.com/starcrm/p/13064842.html</a><br><a href="https://juejin.cn/post/6844904195594665997" target="_blank" rel="noopener">https://juejin.cn/post/6844904195594665997</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/" class="post-title-link" itemprop="url">再谈ThreadLocal</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-08-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-21T00:00:00+08:00">2020-08-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-06 11:25:34" itemprop="dateModified" datetime="2020-11-06T11:25:34+08:00">2020-11-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%B9%B6%E5%8F%91/" itemprop="url" rel="index">
-                    <span itemprop="name">并发</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li>线程本地变量，通过将threadlocal.set(variables)，达到线程之间变量隔离的效果。</li>
-</ul>
-<ul>
-<li>一旦变量塞入到threadlocal方便在整个线程使用周期内，需要variables，可以用threadlocal.get()获得该变量。</li>
-</ul>
+          <p>百万级微服务互相调用，出了问题谁负责？</p>
+<p>打日志，谁接口有问题找谁？</p>
+<p>我咋知道谁接口有问题？</p>
+<p>如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">埋点+无缝透传</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/08/21/%E5%86%8D%E8%B0%88ThreadLocal/#more" rel="contents">
+              <a class="btn" href="/2020/09/21/%E6%96%B0%E5%A2%9Etrace%E6%97%A5%E5%BF%97%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%8F%90%E5%8D%87%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E6%95%88%E7%8E%87/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1164,7 +1178,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1177,7 +1191,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

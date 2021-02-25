@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://yoursite.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="关于验证 验证BST 验证AVL 验证对称二叉树 验证BST的前序序列、后序序列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二叉树系统汇总系列二">
+<meta property="og:url" content="http://yoursite.com/2021/02/21/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%B3%BB%E5%88%97%E4%BA%8C/index.html">
+<meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
+<meta property="og:description" content="关于验证 验证BST 验证AVL 验证对称二叉树 验证BST的前序序列、后序序列">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-25T09:34:43.637Z">
+<meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="二叉树">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2021/02/21/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%B3%BB%E5%88%97%E4%BA%8C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>二叉树系统汇总系列二 | DoubleYao&HebeHo's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">DoubleYao&HebeHo's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">进击的姚总</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/02/21/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%B3%BB%E5%88%97%E4%BA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          二叉树系统汇总系列二
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-02-21T00:00:00+08:00">2021-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-25 17:34:43" itemprop="dateModified" datetime="2021-02-25T17:34:43+08:00">2021-02-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="关于验证"><a href="#关于验证" class="headerlink" title="关于验证"></a>关于验证</h2><ul>
+<li>验证BST</li>
+<li>验证AVL</li>
+<li>验证对称二叉树</li>
+<li>验证BST的前序序列、后序序列</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="验证BST"><a href="#验证BST" class="headerlink" title="验证BST"></a>验证BST</h3><p>思路简洁：先走中序遍历，再验证中序遍历序列是递增数组。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">private List&lt;Integer&gt; list &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">public boolean isBST(TreeNode root)&#123;</span><br><span class="line">    visit(root);</span><br><span class="line">    return check();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void visit(TreeNode root)&#123;</span><br><span class="line">    </span><br><span class="line">    if(root !&#x3D; null)&#123;</span><br><span class="line">        </span><br><span class="line">        visit(root.left);</span><br><span class="line">        </span><br><span class="line">        list.add(root.val);</span><br><span class="line">        </span><br><span class="line">        visit(root.right);</span><br><span class="line">   </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean check()&#123;</span><br><span class="line"></span><br><span class="line">    if(list.size &#x3D;&#x3D; 0 || list.size() &#x3D;&#x3D; 1)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    for(int i&#x3D;1;i&lt;list.size();i++)&#123;</span><br><span class="line">        if(list.get(i) &lt;&#x3D; list.get(i-1))&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证AVL"><a href="#验证AVL" class="headerlink" title="验证AVL"></a>验证AVL</h3><p>AVL的条件：左子树是AVL，右子树是AVL，并且两边高度绝对值小于2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">public boolean isAVL(TreeNode root)&#123;</span><br><span class="line">    </span><br><span class="line">    if(root &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int l &#x3D; depth(root.left);</span><br><span class="line">    </span><br><span class="line">    int r &#x3D; depth(root.right);</span><br><span class="line">    </span><br><span class="line">    return isAVL(root.left) &amp;&amp; isAVL(root.right) &amp;&amp; Math.abs(l-r) &lt; 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 求一棵树的高度</span><br><span class="line">private int depth(TreeNode root)&#123;</span><br><span class="line">    </span><br><span class="line">    if(root &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return Math.max(depth(root.left),depth(root.right)) + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证对称二叉树"><a href="#验证对称二叉树" class="headerlink" title="验证对称二叉树"></a>验证对称二叉树</h3><p>这个题目的思路，在于递归，镜像二叉树，应该从定义出发。</p>
+<p>因为是镜像的，镜像等价于，左子树与右子树对称的，对称的意思，就是说：左右子树都为空，对称。或者说，左子树的值==右子树的值==左子树的右孩子，右子树的左孩子的对称 &amp;&amp; 左子树的左子树，右子树的右子树对称。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">给定一个二叉树，检查它是否是镜像对称的。</span><br><span class="line"></span><br><span class="line">例如，二叉树 [1,2,2,3,4,4,3] 是对称的。</span><br><span class="line"></span><br><span class="line">    1</span><br><span class="line">   &#x2F; \</span><br><span class="line">  2   2</span><br><span class="line"> &#x2F; \ &#x2F; \</span><br><span class="line">3  4 4  3</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public boolean isSymmetric(TreeNode root) &#123;</span><br><span class="line">    if(root &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return help(root.left, root.right);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean help(TreeNode left, TreeNode right)&#123;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    if(left &#x3D;&#x3D; null &amp;&amp; right &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if(left &#x3D;&#x3D; null || right &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这里要记一下！！！！形成记忆！！！</span><br><span class="line">    return left.val &#x3D;&#x3D; right.val &amp;&amp; help(left.right, right.left) &amp;&amp; help(left.left, right.right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证二叉搜索树的前序遍历序列"><a href="#验证二叉搜索树的前序遍历序列" class="headerlink" title="验证二叉搜索树的前序遍历序列"></a>验证二叉搜索树的前序遍历序列</h3><p>这个题目是leetcode高级会员的题目，一般人估计都没有刷过，我也是第一次见，因为贫穷。哈哈哈哈哈。</p>
+<p>看了一下博客是用单调栈做的。</p>
+<p>其实可以试试看照着验证中序序列的办法，进行划分着试试看。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数数组，验证一下这个数组序列是否为二叉搜索树的前序序列，假定每个数都是不同的。</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">public boolean verifyPreorderSequenceOfBST(int[] nums)&#123;</span><br><span class="line">    </span><br><span class="line">    if(nums &#x3D;&#x3D; null || nums.size() &lt; 2)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return verify(nums, 0, nums.length - 1);</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean verify(int[] nums, int l, int r)&#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这里是特殊判别，考虑只有左子树的BST，划分递归会进入到这里</span><br><span class="line">    if(l &gt;&#x3D; r)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int rootVal &#x3D; nums[l];</span><br><span class="line">    </span><br><span class="line">    int i &#x3D; l + 1;</span><br><span class="line">    </span><br><span class="line">    while(nums[i] &lt; rootVal)&#123;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int lEnd &#x3D; i - 1;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 划分成左子树[l+1, lEnd] 和 右子树[lEnd+1, r]两部分</span><br><span class="line">    </span><br><span class="line">    for(int i&#x3D;lEnd+1; i&lt;&#x3D;r; i++)&#123;</span><br><span class="line">    </span><br><span class="line">        if(nums[i] &lt; rootVal)&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    return verify(nums, l+1, lEnd) &amp;&amp; verify(nums, lEnd + 1, r);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证二叉搜索树的后序遍历序列"><a href="#验证二叉搜索树的后序遍历序列" class="headerlink" title="验证二叉搜索树的后序遍历序列"></a>验证二叉搜索树的后序遍历序列</h3><p>这道题是牛客网的一道题，也比较经典的，其实我觉得这个题目的题解是很好理解的。只需要手工模拟一次就明白了。首先BST的性质，后序遍历应该是[左子树，右子树，根节点]，每次通过根节点，把左右子树划分开来，左子树都要小于根节点，右子树都要大于跟节点即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">public boolean VerifySquenceOfBST(int [] sequence) &#123;</span><br><span class="line">    if(sequence &#x3D;&#x3D; null || sequence.length &#x3D;&#x3D; 0)&#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    if(sequence.length &#x3D;&#x3D; 1)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return verify(sequence, 0, sequence.length - 1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private boolean verify(int[] nums, int l, int r)&#123;</span><br><span class="line">    </span><br><span class="line">    if(l &gt;&#x3D; r)&#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int rootVal &#x3D; nums[r];</span><br><span class="line">    </span><br><span class="line">    int leftStartIndex &#x3D; l;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 划分一下左右子树，即找第一个比根节点大的位置</span><br><span class="line">    int leftEndIndex &#x3D; getLeftEndIndex(nums, l, r, rootVal);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 保证右子树是必定比根节点小的</span><br><span class="line">    for(int i &#x3D; leftEndIndex + 1; i &lt; r; i++)&#123;</span><br><span class="line">        if(nums[i] &lt; rootVal)&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 左右子树分别递归</span><br><span class="line">    return verify(nums, leftStartIndex, leftEndIndex) &amp;&amp; verify(nums,leftEndIndex+ 1,r-1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 获取左子树的坐标范围</span><br><span class="line">private int getLeftEndIndex(int[]nums, int l,int r, int rootVal)&#123;</span><br><span class="line">    </span><br><span class="line">    int i &#x3D; l;</span><br><span class="line">    </span><br><span class="line">    while(i &lt; r &amp;&amp; nums[i] &lt; rootVal)&#123;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    return i - 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="关于重建"><a href="#关于重建" class="headerlink" title="关于重建"></a>关于重建</h2><ul>
+<li>重建二叉树(前序、中序-&gt;重建、中序、后序-&gt;重建)</li>
+<li>求一个二叉树的镜像</li>
+<li>有序数组-&gt;最小高度的BST</li>
+<li>最大二叉树</li>
+<li>二叉树的序列化与反序列化</li>
+</ul>
+<h3 id="前序、中序重建二叉树（注意不一定是BST）"><a href="#前序、中序重建二叉树（注意不一定是BST）" class="headerlink" title="前序、中序重建二叉树（注意不一定是BST）"></a>前序、中序重建二叉树（注意不一定是BST）</h3><p><a href="https://blog.csdn.net/GYQJN/article/details/52709972" target="_blank" rel="noopener">https://blog.csdn.net/GYQJN/article/details/52709972</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public TreeNode buildTree(int[] pre, int[] in) &#123;</span><br><span class="line">    return build(pre, 0, pre.length - 1, in, 0, in.length - 1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 其实我理解就是：找根节点 + 分别划分 + 递归</span><br><span class="line">private TreeNode build(int[] pre, int s, int e, int[] in, int l, int r)&#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 注意这里不能取等号的，因为可能只有一个节点</span><br><span class="line">    if(s &gt; e || l &gt; r)&#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 找到根节点</span><br><span class="line">    int rootVal &#x3D; pre[s];</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 根据根节点 对 中序序列 进行 左右子树划分</span><br><span class="line">    </span><br><span class="line">    int i &#x3D; l;</span><br><span class="line">    while(i &lt;&#x3D; r &amp;&amp; in[i] !&#x3D; rootVal)&#123;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int postLeftStart &#x3D; l;</span><br><span class="line">    int postLeftEnd &#x3D; i - 1;</span><br><span class="line">    </span><br><span class="line">    int postRightStart &#x3D; i + 1;</span><br><span class="line">    int postRightEnd &#x3D; r;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    TreeNode root &#x3D; new TreeNode(rootVal);</span><br><span class="line">    </span><br><span class="line">        </span><br><span class="line">    &#x2F;&#x2F; 然后进行递归</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 这里的递归，由于我们计算的是中序序列的左右子树坐标</span><br><span class="line">    &#x2F;&#x2F; 前序序列的左右子树坐标 我们需要另行计算一下</span><br><span class="line">    </span><br><span class="line">    int preLeftStart &#x3D; s + 1;</span><br><span class="line">    int preLeftEnd &#x3D; i - 1 - l + s + 1;</span><br><span class="line">    int preRightStart &#x3D; i - l  + s + 1;</span><br><span class="line">    int preRigthEnd &#x3D; e;</span><br><span class="line">    </span><br><span class="line">    root.left &#x3D; build(pre, s+1, i-l+s, in, l, i-1);</span><br><span class="line">    root.right &#x3D; build(pre, i-l+s+1, e, in, i+1, r);</span><br><span class="line">    </span><br><span class="line">    return root;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="中序、后序重建BST"><a href="#中序、后序重建BST" class="headerlink" title="中序、后序重建BST"></a>中序、后序重建BST</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">public TreeNode reConstructBinaryTree(int[] in, int[] post)&#123;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 找根节点 + 划分 + 递归</span><br><span class="line">private TreeNode build(int[] in, int s, int e, int[] post, int l, int r)&#123;</span><br><span class="line">    </span><br><span class="line">    if(s &gt; e || l &gt; r)&#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 找到根节点</span><br><span class="line">    int rootVal &#x3D; post[r];</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 中序序列划分 左右子树，递归</span><br><span class="line">    int i &#x3D; s;</span><br><span class="line">    while(i &lt;&#x3D; e &amp;&amp; in[i] !&#x3D; rootVal)&#123;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int inLeftStart &#x3D; s;</span><br><span class="line">    int inLeftEnd &#x3D; i - 1;</span><br><span class="line">    int inRightStart &#x3D; i + 1;</span><br><span class="line">    int inRightEnd &#x3D; e;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    TreeNode root &#x3D; new TreeNode(rootVal);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 简单计算一下 i - 1 - s &#x3D; x - l</span><br><span class="line">    root.left &#x3D; build(in, s, i-1, post, l, l + i - 1 - s);</span><br><span class="line">    root.right &#x3D; build(in, i + 1, e, post, l + i - 1 -s +1, r - 1);</span><br><span class="line">    </span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="有序数组-gt-最小高度的BST"><a href="#有序数组-gt-最小高度的BST" class="headerlink" title="有序数组-&gt;最小高度的BST"></a>有序数组-&gt;最小高度的BST</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public TreeNode build(int[] nums)&#123;</span><br><span class="line">    </span><br><span class="line">    if(nums &#x3D;&#x3D; null)&#123;</span><br><span class="line">        retrn null;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int index &#x3D; nums.length&#x2F;2;</span><br><span class="line">    </span><br><span class="line">    TreeNode root &#x3D; new TreeNode(nums[index]);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 递归</span><br><span class="line">    &#x2F;&#x2F;  注意Arrays.copyRangeOf 拷贝范围 左闭右开</span><br><span class="line">    root.left &#x3D; build(Arrays.copyRangeOf(nums, 0, index));</span><br><span class="line">    root.right &#x3D; build(Arrays.copyRangeOf(nums, index + 1, nums.length);</span><br><span class="line">    </span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="二叉树的镜像"><a href="#二叉树的镜像" class="headerlink" title="二叉树的镜像"></a>二叉树的镜像</h3><p>二叉树的镜像就是左右子树反过来，左子树变右子树，右子树变左子树。这个题目其实可以结合对称二叉树看看，虽然没啥太大的关系。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">public TreeNode mirrorTree(TreeNode root) &#123;</span><br><span class="line">    if(root &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;*</span><br><span class="line">        千万别写成</span><br><span class="line">        root.left &#x3D; mirrorTree(root.right);</span><br><span class="line">        root.right &#x3D; mirrorTree(root.left);</span><br><span class="line">        </span><br><span class="line">        因为一直第一步已经把left指向右边了，现在又去做镜像，肯定不对啊。</span><br><span class="line">    </span><br><span class="line">    *&#x2F;</span><br><span class="line">    TreeNode right &#x3D; mirrorTree(root.right);</span><br><span class="line">    TreeNode left  &#x3D; mirrorTree(root.left);</span><br><span class="line">    </span><br><span class="line">    root.left &#x3D; right;</span><br><span class="line">    root.right &#x3D; left;</span><br><span class="line">    </span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public TreeNode miroorTree(TreeNode root)&#123;</span><br><span class="line">    if(root &#x3D;&#x3D; null)&#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; 交换</span><br><span class="line">    TreeNode t &#x3D; root.left;</span><br><span class="line">    root.left &#x3D; root.right;</span><br><span class="line">    root.right &#x3D; t;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 递归</span><br><span class="line">    mirrorTree(root.left);</span><br><span class="line">    mirrorTree(root.right);</span><br><span class="line"></span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="最大二叉树"><a href="#最大二叉树" class="headerlink" title="最大二叉树"></a>最大二叉树</h3><p>这个题目跟有序数组构建二叉树一样，直接递归来做，注意Arrays.copyOfRange()方法的使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">给定一个不含重复元素的整数数组 nums 。一个以此数组直接递归构建的 最大二叉树 定义如下：</span><br><span class="line"></span><br><span class="line">二叉树的根是数组 nums 中的最大元素。</span><br><span class="line">左子树是通过数组中 最大值左边部分 递归构造出的最大二叉树。</span><br><span class="line">右子树是通过数组中 最大值右边部分 递归构造出的最大二叉树。</span><br><span class="line">返回有给定数组 nums 构建的 最大二叉树 。</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public TreeNode constructMaximumBinaryTree(int[] nums) &#123;</span><br><span class="line">    if(nums &#x3D;&#x3D; null || nums.length &#x3D;&#x3D; 0)&#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    int index &#x3D; getMaxIndex(nums, 0, nums.length - 1);</span><br><span class="line">    TreeNode root &#x3D; new TreeNode(nums[index]);</span><br><span class="line">    root.left &#x3D; constructMaximumBinaryTree(Arrays.copyOfRange(nums, 0, index));</span><br><span class="line">    root.right &#x3D; constructMaximumBinaryTree(Arrays.copyOfRange(nums, index + 1, nums.length));</span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private int getMaxIndex(int[] nums, int l, int r)&#123;</span><br><span class="line">    int index &#x3D; l;</span><br><span class="line"></span><br><span class="line">    int maxValue &#x3D; Integer.MIN_VALUE;</span><br><span class="line">    for(int i &#x3D; l; i &lt;&#x3D; r; i++)&#123;</span><br><span class="line">        if(maxValue &lt; nums[i])&#123;</span><br><span class="line">            maxValue &#x3D; nums[i];</span><br><span class="line">            index &#x3D; i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" rel="tag"># 二叉树</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/02/17/%E5%A0%86%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="prev" title="堆的大总结">
+      <i class="fa fa-chevron-left"></i> 堆的大总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/21/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%B3%BB%E5%88%97%E4%B8%89/" rel="next" title="二叉树系统汇总系列三">
+      二叉树系统汇总系列三 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#关于验证"><span class="nav-number">1.</span> <span class="nav-text">关于验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#验证BST"><span class="nav-number">1.1.</span> <span class="nav-text">验证BST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证AVL"><span class="nav-number">1.2.</span> <span class="nav-text">验证AVL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证对称二叉树"><span class="nav-number">1.3.</span> <span class="nav-text">验证对称二叉树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证二叉搜索树的前序遍历序列"><span class="nav-number">1.4.</span> <span class="nav-text">验证二叉搜索树的前序遍历序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证二叉搜索树的后序遍历序列"><span class="nav-number">1.5.</span> <span class="nav-text">验证二叉搜索树的后序遍历序列</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于重建"><span class="nav-number">2.</span> <span class="nav-text">关于重建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#前序、中序重建二叉树（注意不一定是BST）"><span class="nav-number">2.1.</span> <span class="nav-text">前序、中序重建二叉树（注意不一定是BST）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中序、后序重建BST"><span class="nav-number">2.2.</span> <span class="nav-text">中序、后序重建BST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有序数组-gt-最小高度的BST"><span class="nav-number">2.3.</span> <span class="nav-text">有序数组-&gt;最小高度的BST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二叉树的镜像"><span class="nav-number">2.4.</span> <span class="nav-text">二叉树的镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最大二叉树"><span class="nav-number">2.5.</span> <span class="nav-text">最大二叉树</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">doubleyao</p>
+  <div class="site-description" itemprop="description">就是干</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">doubleyao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

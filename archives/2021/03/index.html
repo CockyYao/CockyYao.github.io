@@ -46,19 +46,17 @@
   };
 </script>
 
-  <meta name="description" content="title: 事务与锁date: 2020-10-22categories: 数据库tags: Mysql  我们说事务有四大特性，acid 原子性强调所有操作同时失败或同时成功，不存在中间状态。 一致性强调事务需要从一个一致性状态转移到另外一个一致性状态，比如转账业务，不论AB之间如何转账，最终总和一致。 隔离性强调事务与事务之间互相的隔离，互相不影响。 持久性强调事务一旦被提交了，这种改变将">
-<meta property="og:type" content="article">
-<meta property="og:title" content="事务与锁">
-<meta property="og:url" content="http://yoursite.com/2020/12/02/%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81/index.html">
+  <meta name="description" content="就是干">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DoubleYao&amp;HebeHo&#39;s Blog">
+<meta property="og:url" content="http://yoursite.com/archives/2021/03/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="title: 事务与锁date: 2020-10-22categories: 数据库tags: Mysql  我们说事务有四大特性，acid 原子性强调所有操作同时失败或同时成功，不存在中间状态。 一致性强调事务需要从一个一致性状态转移到另外一个一致性状态，比如转账业务，不论AB之间如何转账，最终总和一致。 隔离性强调事务与事务之间互相的隔离，互相不影响。 持久性强调事务一旦被提交了，这种改变将">
+<meta property="og:description" content="就是干">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-12-02T01:52:54.774Z">
-<meta property="article:modified_time" content="2020-12-02T01:52:55.147Z">
 <meta property="article:author" content="doubleyao">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/12/02/%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81/">
+<link rel="canonical" href="http://yoursite.com/archives/2021/03/">
 
 
 <script id="page-configurations">
@@ -66,11 +64,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: true
+    isPost: false
   };
 </script>
 
-  <title>事务与锁 | DoubleYao&HebeHo's Blog</title>
+  <title>归档 | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -180,145 +178,49 @@
           <div class="content">
             
 
-  <div class="posts-expand">
-      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/12/02/%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="doubleyao">
-      <meta itemprop="description" content="就是干">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          事务与锁
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-02 09:52:54 / 修改时间：09:52:55" itemprop="dateCreated datePublished" datetime="2020-12-02T09:52:54+08:00">2020-12-02</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+  
+  <div class="post-block">
+    <div class="posts-collapse">
+      <div class="collection-title">
+        <span class="collection-header">嗯..! 目前共计 28 篇日志。 继续努力。</span>
+      </div>
 
       
-        <hr>
-<p>title: 事务与锁<br>date: 2020-10-22<br>categories: 数据库<br>tags: Mysql</p>
-<hr>
-<p>我们说事务有四大特性，acid</p>
-<p>原子性强调所有操作同时失败或同时成功，不存在中间状态。</p>
-<p>一致性强调事务需要从一个一致性状态转移到另外一个一致性状态，比如转账业务，不论AB之间如何转账，最终总和一致。</p>
-<p>隔离性强调事务与事务之间互相的隔离，互相不影响。</p>
-<p>持久性强调事务一旦被提交了，这种改变将是永久的。</p>
-<a id="more"></a>
-
-<h3 id="并发事务"><a href="#并发事务" class="headerlink" title="并发事务"></a>并发事务</h3><p>很自然的？如果有很多个事务同时在进行操作，那该咋办呢？这种并发资源的访问，效率最重要了，如何去隔离多个事务之间的操作呢？</p>
-<p>我们说了，数据库多个事务之间，如何隔离呢？不同的隔离级别就会影响事务之间的操作效率。</p>
-<ul>
-<li>串行化</li>
-</ul>
-<p>最高的隔离级别，说是事务与事务之间一点关系都没有，必须要一个一个去执行的。这种做法每个事务会持有数据库的表锁，也就是说，某个事务期间，锁住的是整张表，等到事务结束了，才会释放锁。</p>
-<ul>
-<li>可重复读</li>
-</ul>
-<p>因为有时候，锁住表效率真的太低了，考虑一种提高点效率，进而降低锁的粒度，使用行锁。在事务提交之前，并不释放共享锁。直到事务提交完了之后，再释放锁。</p>
-<p>这种的话，虽然把粒度控制在行上，如果出现select count(*) from …. 便会出现幻读的情况。两次读取的条数不一样。</p>
-<ul>
-<li>读已提交</li>
-</ul>
-<p>对于行锁的控制，人们在考虑用读写分离的思想，针对某一行，读锁是共享的，写锁是互斥的。采用读写分离的策略。</p>
-<p>针对某一行数据，许多事务都在操作这一行数据，<br>有许多读数据的，有许多写数据的。那么这种情况怎么搞？读锁是共享的，写锁是互斥的。换句话说，读取数据大家可以同时去读，写数据的瞬间是互斥的，一定要拿到写锁才能去写。</p>
-<p>读锁的读取，针对<strong>已经提交的数据</strong>进行读取。</p>
-<p>存在不可重复读的情况，两次读取，可能数据不一致的。</p>
-<ul>
-<li>读未提交</li>
-</ul>
-<p>因为每一行数据存在提交与未提交两种状态，并发去读那些<strong>未提交的数据</strong>，更大程度提升效率。</p>
-<p>读那些还没提交的数据，如果回滚了？存在读取脏数据的情况。</p>
-<h3 id="数据库的锁"><a href="#数据库的锁" class="headerlink" title="数据库的锁"></a>数据库的锁</h3><p>从粒度上分</p>
-<ul>
-<li>表锁</li>
-<li>页锁</li>
-<li>行锁</li>
-</ul>
-<p>InnoDB的行锁，基于索引来完成的</p>
-<p>从共享资源的访问上分</p>
-<ul>
-<li>共享锁</li>
-<li>排他锁</li>
-</ul>
-<ul>
-<li>乐观锁，适合读多写少场景</li>
-<li>悲观锁，适合读少写多场景</li>
-</ul>
-<h3 id="关于锁算法"><a href="#关于锁算法" class="headerlink" title="关于锁算法"></a>关于锁算法</h3><ul>
-<li>record key</li>
-</ul>
-<p>单纯锁住某一行的记录</p>
-<ul>
-<li>gap lock</li>
-</ul>
-<p>锁住某个范围，不包括改行的记录</p>
-<p>这么设计为了阻止多个事务将记录插入到同一范围内部，这将导致幻读问题。</p>
-<ul>
-<li>next-key lock</li>
-</ul>
-<p>锁定某个范围，包括记录本身。</p>
-<p><a href="https://yann0917.github.io/2020/01/12/%E5%A6%82%E4%BD%95%E5%90%88%E7%90%86%E4%BD%BF%E7%94%A8MySQL%E4%BA%8B%E5%8A%A1/" target="_blank" rel="noopener">https://yann0917.github.io/2020/01/12/%E5%A6%82%E4%BD%95%E5%90%88%E7%90%86%E4%BD%BF%E7%94%A8MySQL%E4%BA%8B%E5%8A%A1/</a></p>
-<p><a href="https://github.com/Yhzhtk/note/issues/42" target="_blank" rel="noopener">https://github.com/Yhzhtk/note/issues/42</a></p>
-<p><a href="https://github.com/Yhzhtk/note/issues/42" target="_blank" rel="noopener">https://github.com/Yhzhtk/note/issues/42</a></p>
-
+    <div class="collection-year">
+      <h1 class="collection-header">2021</h1>
     </div>
 
-    
-    
-    
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
 
-      <footer class="post-footer">
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2021-03-03T15:15:18+08:00"
+              content="2021-03-03">
+          03-03
+        </time>
+      </div>
 
-        
+      <h2 class="post-title">
+          <a class="post-title-link" href="/2021/03/03/%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%94%81/" itemprop="url">
+            <span itemprop="name">事务与锁</span>
+          </a>
+      </h2>
 
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/11/30/kafka%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF/" rel="prev" title="kafka事务消息">
-      <i class="fa fa-chevron-left"></i> kafka事务消息
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/12/06/zookeeper%E5%8F%AF%E9%9D%A0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" rel="next" title="zookeeper可靠分布式锁">
-      zookeeper可靠分布式锁 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
+    </header>
   </article>
+
+
+    </div>
+  </div>
   
   
   
 
-  </div>
+  
+
 
 
           </div>
@@ -369,7 +271,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#并发事务"><span class="nav-number">1.</span> <span class="nav-text">并发事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库的锁"><span class="nav-number">2.</span> <span class="nav-text">数据库的锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于锁算法"><span class="nav-number">3.</span> <span class="nav-text">关于锁算法</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

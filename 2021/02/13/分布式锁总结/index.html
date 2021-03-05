@@ -46,17 +46,20 @@
   };
 </script>
 
-  <meta name="description" content="就是干">
-<meta property="og:type" content="website">
-<meta property="og:title" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/archives/2021/page/2/index.html">
+  <meta name="description" content="分布式锁总结 分布式锁有哪几种实现方式? 什么场景下会用到分布式锁?  Redis实现 redis实现分布式锁的原理？ redis的setnx过期时间设置？ redis解锁前要验证一下锁是否是自己的？ redis set的时候，key value分别是什么? redis分布式锁有什么问题？-&gt; redlock算法 redlock算法的过程? redlock算法中N个redis实例、实例是以什">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式锁总结">
+<meta property="og:url" content="http://yoursite.com/2021/02/13/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="DoubleYao&amp;HebeHo&#39;s Blog">
-<meta property="og:description" content="就是干">
+<meta property="og:description" content="分布式锁总结 分布式锁有哪几种实现方式? 什么场景下会用到分布式锁?  Redis实现 redis实现分布式锁的原理？ redis的setnx过期时间设置？ redis解锁前要验证一下锁是否是自己的？ redis set的时候，key value分别是什么? redis分布式锁有什么问题？-&gt; redlock算法 redlock算法的过程? redlock算法中N个redis实例、实例是以什">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-05T02:29:59.333Z">
 <meta property="article:author" content="doubleyao">
+<meta property="article:tag" content="分布式锁">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/archives/2021/page/2/">
+<link rel="canonical" href="http://yoursite.com/2021/02/13/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E6%80%BB%E7%BB%93/">
 
 
 <script id="page-configurations">
@@ -64,11 +67,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false
+    isPost: true
   };
 </script>
 
-  <title>归档 | DoubleYao&HebeHo's Blog</title>
+  <title>分布式锁总结 | DoubleYao&HebeHo's Blog</title>
   
 
 
@@ -178,92 +181,139 @@
           <div class="content">
             
 
+  <div class="posts-expand">
+      
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">嗯..! 目前共计 29 篇日志。 继续努力。</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/02/13/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="doubleyao">
+      <meta itemprop="description" content="就是干">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="DoubleYao&HebeHo's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式锁总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-13 00:00:00" itemprop="dateCreated datePublished" datetime="2021-02-13T00:00:00+08:00">2021-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-05 10:29:59" itemprop="dateModified" datetime="2021-03-05T10:29:59+08:00">2021-03-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <h1 class="collection-header">2021</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-21T00:00:00+08:00"
-              content="2021-01-21">
-          01-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2021/01/21/%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" itemprop="url">
-            <span itemprop="name">排序总结系列</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-21T00:00:00+08:00"
-              content="2021-01-21">
-          01-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2021/01/21/%E6%95%B0%E7%BB%84%E9%87%8D%E5%A4%8D%E5%85%83%E7%B4%A0%E5%A4%A7%E6%80%BB%E7%BB%93/" itemprop="url">
-            <span itemprop="name">数组重复元素总结</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-01-21T00:00:00+08:00"
-              content="2021-01-21">
-          01-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2021/01/21/%E9%93%BE%E8%A1%A8%E5%A4%A7%E6%80%BB%E7%BB%93/" itemprop="url">
-            <span itemprop="name">链表大总结</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
+        <h2 id="分布式锁总结"><a href="#分布式锁总结" class="headerlink" title="分布式锁总结"></a>分布式锁总结</h2><ul>
+<li>分布式锁有哪几种实现方式?</li>
+<li>什么场景下会用到分布式锁?</li>
+</ul>
+<h2 id="Redis实现"><a href="#Redis实现" class="headerlink" title="Redis实现"></a>Redis实现</h2><ul>
+<li>redis实现分布式锁的原理？</li>
+<li>redis的setnx过期时间设置？</li>
+<li>redis解锁前要验证一下锁是否是自己的？</li>
+<li>redis set的时候，key value分别是什么?</li>
+<li>redis分布式锁有什么问题？-&gt; redlock算法</li>
+<li>redlock算法的过程?</li>
+<li>redlock算法中N个redis实例、实例是以什么形式部署的？</li>
+</ul>
+<p>拓展一下</p>
+<ul>
+<li>redis集群有哪几种部署方式</li>
+<li>redis集群的高可用、一致性是怎么做的？</li>
+</ul>
+<h2 id="zookeeper实现"><a href="#zookeeper实现" class="headerlink" title="zookeeper实现"></a>zookeeper实现</h2><ul>
+<li>zk实现分布式锁的原理？</li>
+<li>为什么选择创建临时有序节点？</li>
+<li>zk如何实现分布式读写分离锁？</li>
+<li>zk实际是AP还是CP呢？</li>
+<li>zk的惊群现象？如何避免？</li>
+</ul>
+<p>拓展一下</p>
+<ul>
+<li>zk集群的部署方式？</li>
+<li>zk集群的高可用、一致性又是怎么做的？</li>
+</ul>
+<h2 id="Mysql实现"><a href="#Mysql实现" class="headerlink" title="Mysql实现"></a>Mysql实现</h2><ul>
+<li>mysql实现分布式锁的几种方式？</li>
+<li>mysql实现分布式锁如何实现重入性？</li>
+<li>如何避免死锁呢？</li>
+<li>数据库挂掉怎么办？</li>
+<li>死锁问题？锁失效时间设置</li>
+<li>是否阻塞？</li>
+<li>是否可重入？</li>
+</ul>
 
     </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" rel="tag"># 分布式锁</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/21/LFU%E5%92%8CLRU%E7%9A%84%E5%AE%9E%E7%8E%B0/" rel="prev" title="谈谈LRU和LFU">
+      <i class="fa fa-chevron-left"></i> 谈谈LRU和LFU
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/17/%E5%A0%86%E7%9A%84%E5%A4%A7%E6%80%BB%E7%BB%93/" rel="next" title="堆的大总结">
+      堆的大总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
   </div>
-  
-  
-  
-
-  
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/archives/2021/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/archives/2021/">1</a><span class="page-number current">2</span>
-  </nav>
-
 
 
           </div>
@@ -314,6 +364,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式锁总结"><span class="nav-number">1.</span> <span class="nav-text">分布式锁总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis实现"><span class="nav-number">2.</span> <span class="nav-text">Redis实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper实现"><span class="nav-number">3.</span> <span class="nav-text">zookeeper实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql实现"><span class="nav-number">4.</span> <span class="nav-text">Mysql实现</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
